@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- DhcpServerDsc
+- xDhcpServer
   - Added automatic release with a new CI pipeline ([issue #59](https://github.com/dsccommunity/DhcpServerDsc/issues/59)).
   - Conceptual help is now generated for each resource on build.
   - Added new resource DhcpServerBinding ([issue #55](https://github.com/dsccommunity/DhcpServerDsc/issues/55)).
