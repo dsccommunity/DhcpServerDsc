@@ -18,7 +18,7 @@
     Copyright         = 'Copyright the DSC Community contributors. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'Common functions used by the DSC resources in xDhcpServer.'
+    Description       = 'Common functions used by the DSC resources in DhcpServerDsc.'
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
@@ -44,4 +44,3 @@
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 }
-

@@ -4,7 +4,7 @@
 #>
 configuration Example
 {
-    Import-DscResource -moduleName 'xDhcpServer'
+    Import-DscResource -moduleName 'DhcpServerDsc'
 
     xDhcpServerAuthorization 'RemoteServerActivation'
     {

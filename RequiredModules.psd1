@@ -21,7 +21,7 @@
 
     <#
         Prerequisites modules needed for examples and integration tests of
-        the xDhcpServer module.
+        the DhcpServerDsc module.
     #>
     PSDscResources                 = '2.12.0.0'
 

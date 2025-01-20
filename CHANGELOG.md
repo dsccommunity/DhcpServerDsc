@@ -1,16 +1,23 @@
-# Changelog for xDhcpServer
+# Changelog for DhcpServerDsc
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- `xDhcpServer`
+  - BREAKING CHANGE
+    - Renamed _xDhcpServer_ to _DhcpServerDsc_ - Fixes [#89](https://github.com/dsccommunity/DhcpServerDsc/issues/89).
+    - Updated all references to old module name.
+
 ## [3.1.2] - 2025-01-19
 
 ### Deprecated
 
 - **The module _xDhcpServer_ will be renamed to _DhcpServerDsc_
-  ([issue #89](https://github.com/dsccommunity/xDhcpServer/issues/89)).
+  ([issue #89](https://github.com/dsccommunity/DhcpServerDsc/issues/89)).
   The version `v3.1.2` will be the the last release of _xDhcpServer_.
   Version `v4.0.0` will be released as _DhcpServerDsc_, it will be
   released shortly after the `v3.1.2` release to be able to start transition
@@ -29,14 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `README`
-  - Removed resource documentation from README. Fixes [#85](https://github.com/dsccommunity/xDhcpServer/issues/85)
+  - Removed resource documentation from README. Fixes [#85](https://github.com/dsccommunity/DhcpServerDsc/issues/85)
 
 ## [3.1.0] - 2022-05-07
 
 ### Added
 
 - xDhcpServerOptionDefinition
-  - Added DefaultValue parameter to xDhcpServerOptionDefinition ([issue #75](https://github.com/dsccommunity/xDhcpServer/issues/75)).
+  - Added DefaultValue parameter to xDhcpServerOptionDefinition ([issue #75](https://github.com/dsccommunity/DhcpServerDsc/issues/75)).
 
 ### Changed
 
@@ -48,17 +55,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xDhcpServerReservation
   - Fixed a bug that was caused by invalid filter script for `Where-Object`
-    ([issue #73](https://github.com/dsccommunity/xDhcpServer/issues/73)).
+    ([issue #73](https://github.com/dsccommunity/DhcpServerDsc/issues/73)).
 
 ## [3.0.0] - 2021-01-25
 
 ### Added
 
 - xDhcpServer
-  - Added automatic release with a new CI pipeline ([issue #59](https://github.com/dsccommunity/xDhcpServer/issues/59)).
+  - Added automatic release with a new CI pipeline ([issue #59](https://github.com/dsccommunity/DhcpServerDsc/issues/59)).
   - Conceptual help is now generated for each resource on build.
-  - Added new resource DhcpServerBinding ([issue #55](https://github.com/dsccommunity/xDhcpServer/issues/55)).
-  - Added new resource DhcpServerExclusionRange ([issue #7](https://github.com/dsccommunity/xDhcpServer/issues/7)).
+  - Added new resource DhcpServerBinding ([issue #55](https://github.com/dsccommunity/DhcpServerDsc/issues/55)).
+  - Added new resource DhcpServerExclusionRange ([issue #7](https://github.com/dsccommunity/DhcpServerDsc/issues/7)).
 
 ### Changed
 
@@ -68,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - BREAKING CHANGE: The resource is now a single instance resource so
     that it is only possible to use the resource once in a configuration
     with the parameter `Ensure` set to either `Present` or `Absent`
-    ([issue #40](https://github.com/dsccommunity/xDhcpServer/issues/40)).
+    ([issue #40](https://github.com/dsccommunity/DhcpServerDsc/issues/40)).
   - The helper function `Get-IPv4Address` was changed from using `Get-WmiObject`
     to `Get-CimInstance` when fetching the enabled IP addresses.
 - xDhcpServerOptionDefinition
@@ -83,19 +90,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DhcpServerOptionValue
   - Added -Force flag to all Set-DhcpServerV4OptionValue calls to resolve errors
     when unnessesary validation is performed by the Cmdlet.
-    ([issue #56](https://github.com/dsccommunity/xDhcpServer/issues/56))
+    ([issue #56](https://github.com/dsccommunity/DhcpServerDsc/issues/56))
 
 ### Removed
 
 - BREAKING CHANGE: Removed the deprecated resource xDhcpServerOption which
-  has been replaced by other DSC resources ([issue #46](https://github.com/dsccommunity/xDhcpServer/issues/46)).
+  has been replaced by other DSC resources ([issue #46](https://github.com/dsccommunity/DhcpServerDsc/issues/46)).
 - Removed the file `TestSampleUsingAzure.ps1` as it was not a working example
   of running integration tests.
 
 ### [2.0.0.0] - 2018-07-25
 
 - BREAKING CHANGE: Switch to ScopeId as a key property for xDhcpServerScope
-  ([issue #48](https://github.com/dsccommunity/xDhcpServer/issues/48)).
+  ([issue #48](https://github.com/dsccommunity/DhcpServerDsc/issues/48)).
   [Bartek Bielawski (@bielawb)](https://github.com/bielawb)
 
 ### [1.7.0.0] - 2018-06-13
