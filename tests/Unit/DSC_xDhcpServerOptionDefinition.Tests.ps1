@@ -1,5 +1,5 @@
 $script:dscModuleName = 'DhcpServerDsc'
-$script:dscResourceName = 'MSFT_xDhcpServerOptionDefinition'
+$script:dscResourceName = 'DSC_xDhcpServerOptionDefinition'
 
 function Invoke-TestSetup
 {
@@ -63,7 +63,7 @@ try
             DefaultValue  = $defaultValue
         }
 
-        Describe 'MSFT_xDhcpServerOptionDefinition\Get-TargetResource' {
+        Describe 'DSC_xDhcpServerOptionDefinition\Get-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
                 Mock -CommandName Set-DhcpServerv4OptionDefinition
@@ -87,7 +87,7 @@ try
             }
         }
 
-        Describe 'MSFT_xDhcpServerOptionDefinition\Test-TargetResource' {
+        Describe 'DSC_xDhcpServerOptionDefinition\Test-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
 
@@ -279,7 +279,7 @@ try
             }
         }
 
-        Describe 'MSFT_xDhcpServerOptionDefinition\Set-TargetResource' {
+        Describe 'DSC_xDhcpServerOptionDefinition\Set-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
             }

@@ -1,5 +1,5 @@
 ﻿$script:dscModuleName = 'DhcpServerDsc'
-$script:dscResourceName = 'MSFT_DhcpServerExclusionRange'
+$script:dscResourceName = 'DSC_DhcpServerExclusionRange'
 
 function Invoke-TestSetup
 {

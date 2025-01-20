@@ -1,5 +1,5 @@
 $script:dscModuleName = 'DhcpServerDsc'
-$script:dscResourceName = 'MSFT_xDhcpServerAuthorization'
+$script:dscResourceName = 'DSC_xDhcpServerAuthorization'
 
 function Invoke-TestSetup
 {
@@ -114,7 +114,7 @@ try
             }
         )
 
-        Describe 'MSFT_xDhcpServerAuthorization\Get-TargetResource' {
+        Describe 'DSC_xDhcpServerAuthorization\Get-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
             }
@@ -149,7 +149,7 @@ try
 
         }
 
-        Describe 'MSFT_xDhcpServerAuthorization\Test-TargetResource' {
+        Describe 'DSC_xDhcpServerAuthorization\Test-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
             }
@@ -217,7 +217,7 @@ try
             }
         }
 
-        Describe 'MSFT_xDhcpServerAuthorization\Set-TargetResource' {
+        Describe 'DSC_xDhcpServerAuthorization\Set-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module
             }
@@ -242,7 +242,7 @@ try
             }
         }
 
-        Describe 'MSFT_xDhcpServerAuthorization\Get-IPv4Address' {
+        Describe 'DSC_xDhcpServerAuthorization\Get-IPv4Address' {
             It 'Returns a IPv4 address' {
                 $result = Get-IPv4Address -Verbose | Select-Object -First 1
 
@@ -250,7 +250,7 @@ try
             }
         }
 
-        Describe 'MSFT_xDhcpServerAuthorization\Get-Hostname' {
+        Describe 'DSC_xDhcpServerAuthorization\Get-Hostname' {
             It 'Returns at least the current NetBIOS name' {
                 $hostname = [System.Net.Dns]::GetHostname()
 

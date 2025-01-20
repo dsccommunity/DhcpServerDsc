@@ -1,5 +1,5 @@
 ﻿$script:dscModuleName = 'DhcpServerDsc'
-$script:dscResourceName = 'MSFT_DhcpServerBinding'
+$script:dscResourceName = 'DSC_DhcpServerBinding'
 
 function Invoke-TestSetup
 {

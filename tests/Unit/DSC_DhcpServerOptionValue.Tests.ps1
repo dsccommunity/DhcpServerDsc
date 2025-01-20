@@ -1,5 +1,5 @@
 $script:dscModuleName = 'DhcpServerDsc'
-$script:dscResourceName = 'MSFT_DhcpServerOptionValue'
+$script:dscResourceName = 'DSC_DhcpServerOptionValue'
 
 function Invoke-TestSetup
 {
@@ -77,7 +77,7 @@ try
             }
         }
 
-        Describe 'MSFT_DhcpPolicyOptionValue\Get-TargetResource' {
+        Describe 'DSC_DhcpPolicyOptionValue\Get-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper'
             }
@@ -134,7 +134,7 @@ try
         }
 
 
-        Describe 'MSFT_DhcpPolicyOptionValue\Test-TargetResource' {
+        Describe 'DSC_DhcpPolicyOptionValue\Test-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper'
             }
@@ -172,7 +172,7 @@ try
             }
         }
 
-        Describe 'MSFT_DhcpPolicyOptionValue\Set-TargetResource' {
+        Describe 'DSC_DhcpPolicyOptionValue\Set-TargetResource' {
             BeforeAll {
                 Mock -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper'
             }
