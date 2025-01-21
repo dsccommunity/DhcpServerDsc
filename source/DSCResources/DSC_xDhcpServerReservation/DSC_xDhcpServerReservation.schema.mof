@@ -5,6 +5,6 @@ class DSC_xDhcpServerReservation : OMI_BaseResource
     [Key, Description("IP address of the reservation for which the properties are modified")] String IPAddress;
     [Required, Description("Client MAC Address to set on the reservation")] String ClientMACAddress;
     [Write, Description("Reservation name")] String Name;
-    [Write, Description("Address family type"), ValueMap{"IPv4"}, Values{"IPv4"}] String AddressFamily;
+    [Write, Description("Address family type"), ValueMap{"IPv4","IPv6"}, Values{"IPv4","IPv6"}] String AddressFamily;
     [Write, Description("Whether option should be set or removed"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
 };
