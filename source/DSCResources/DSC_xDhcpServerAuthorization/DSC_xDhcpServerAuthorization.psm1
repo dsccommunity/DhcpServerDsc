@@ -224,5 +224,3 @@ function Get-Hostname
         }
     } #end process
 } #end function Get-Hostname
-
-Export-ModuleMember -Function *-TargetResource

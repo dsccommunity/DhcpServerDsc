@@ -712,5 +712,3 @@ function Update-ResourceProperties
         }
     } # else !dhcpscope
 }
-
-Export-ModuleMember -Function *-TargetResource
