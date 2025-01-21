@@ -25,7 +25,7 @@ function Get-TargetResource
         $IPAddress,
 
         [Parameter()]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily = 'IPv4'
     )
@@ -99,7 +99,7 @@ function Set-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily = 'IPv4',
 
@@ -149,7 +149,7 @@ function Test-TargetResource
         $Name,
 
         [Parameter()]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily = 'IPv4',
 
