@@ -55,6 +55,8 @@ AfterAll {
 }
 
 
+# TODO: Remove
+
 # $policyName = 'Test Policy'
 # $optionId = 67
 # $value = @('test Value')
@@ -126,7 +128,7 @@ Describe 'DSC_DhcpPolicyOptionValue\Get-TargetResource' -Tag 'Get' {
     }
 
 
-    It 'Returns all correct values' {
+    It 'Should return the correct values' {
         InModuleScope -ScriptBlock {
             Set-StrictMode -Version 1.0
 
@@ -158,73 +160,56 @@ Describe 'DSC_DhcpPolicyOptionValue\Get-TargetResource' -Tag 'Get' {
 }
 
 
-# Describe 'DSC_DhcpPolicyOptionValue\Test-TargetResource' {
-#     BeforeAll {
-#         Mock -CommandName Assert-Module
-#     }
+Describe 'DSC_DhcpPolicyOptionValue\Test-TargetResource' -Tag 'Test' {
+    BeforeAll {
+        Mock -CommandName Test-TargetResourceHelper -MockWith {
+            return $true
+        }
+    }
 
-#     It 'Returns a "System.Boolean" object type' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpPolicyv4OptionValue
+    It 'Should call the expected mocks' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
 
-#         $result = Test-TargetResource @testParams -Ensure 'Present' -Value $value
+            $testParams = @{
+                PolicyName    = 'Test Policy'
+                OptionId      = 67
+                Value         = @('test Value')
+                ScopeId       = '192.168.10.0'
+                VendorClass   = ''
+                AddressFamily = 'IPv4'
+            }
 
-#         $result | Should -BeOfType [System.Boolean]
-#     }
+            $result = Test-TargetResource @testParams
 
-#     It 'Returns $true when the option exists and Ensure = Present' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpPolicyv4OptionValue
+            $result | Should -BeTrue
+        }
 
-#         $result = Test-TargetResource @testParams -Ensure 'Present' -Value $value
+        Should -Invoke -CommandName Test-TargetResourceHelper -Exactly -Times 1 -Scope It
+    }
+}
 
-#         $result | Should -Be $true
-#     }
+Describe 'DSC_DhcpPolicyOptionValue\Set-TargetResource' -Tag 'Set' {
+    BeforeAll {
+        Mock -CommandName Set-TargetResourceHelper
+    }
 
-#     It 'Returns $false when the option does not exist and Ensure = Present' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith { return $null }
+    It 'Should call the expected mocks' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
 
-#         $result = Test-TargetResource @testParams -Ensure 'Present' -Value $value
+            $testParams = @{
+                PolicyName    = 'Test Policy'
+                OptionId      = 67
+                Value         = @('test Value')
+                ScopeId       = '192.168.10.0'
+                VendorClass   = ''
+                AddressFamily = 'IPv4'
+            }
 
-#         $result | Should -Be $false
-#     }
+            Set-TargetResource @testParams
+        }
 
-#     It 'Returns $false when the option exists and Ensure = Absent ' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpPolicyv4OptionValue
-
-#         $result = Test-TargetResource @testParams -Ensure 'Absent' -Value $value
-
-#         $result | Should -Be $false
-#     }
-# }
-
-# Describe 'DSC_DhcpPolicyOptionValue\Set-TargetResource' {
-#     BeforeAll {
-#         Mock -CommandName Assert-Module
-#     }
-
-#     Mock -CommandName Remove-DhcpServerv4OptionValue
-#     Mock -CommandName Set-DhcpServerv4OptionValue
-
-#     It 'Should call "Set-DhcpServerv4OptionValue" when "Ensure" = "Present" and definition does not exist' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith { return $null }
-
-#         Set-TargetResource @testParams -Ensure 'Present' -Value $value
-
-#         Assert-MockCalled -CommandName Set-DhcpServerv4OptionValue -Exactly -Times 1 -Scope It
-#     }
-
-#     It 'Should call "Remove-DhcpServerv4OptionValue" when "Ensure" = "Absent" and Definition does exist' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpPolicyv4OptionValue
-
-#         Set-TargetResource @testParams -Ensure 'Absent' -Value $value
-
-#         Assert-MockCalled -CommandName Remove-DhcpServerv4OptionValue -Exactly -Times 1 -Scope It
-#     }
-
-#     It 'Should call "Set-DhcpServerv4OptionValue" when "Ensure" = "Present" and option value is different' {
-#         Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $getFakeDhcpPolicyv4OptionValueDifferentValue
-
-#         Set-TargetResource @testParams -Ensure 'Present' -Value $value
-
-#         Assert-MockCalled -CommandName Set-DhcpServerv4OptionValue -Exactly -Times 1 -Scope It
-#     }
-# }
+        Should -Invoke -CommandName Set-TargetResourceHelper -Exactly -Times 1 -Scope It
+    }
+}
