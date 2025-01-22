@@ -54,59 +54,6 @@ AfterAll {
     Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
 }
 
-
-# TODO: Remove
-
-# $policyName = 'Test Policy'
-# $optionId = 67
-# $value = @('test Value')
-# $scopeId = '10.1.1.0'
-# $vendorClass = ''
-# $addressFamily = 'IPv4'
-# $ensure = 'Present'
-
-# $testParams = @{
-#     PolicyName    = $policyName
-#     OptionId      = $optionId
-#     ScopeId       = $scopeId
-#     VendorClass   = $vendorClass
-#     AddressFamily = $addressFamily
-#     Verbose       = $true
-# }
-
-# $getFakeDhcpPolicyv4OptionValue = {
-#     return @{
-#         PolicyName    = $policyName
-#         OptionId      = $optionId
-#         Value         = $value
-#         ScopeId       = $scopeId
-#         VendorClass   = $vendorClass
-#         AddressFamily = $addressFamily
-#     }
-# }
-
-# $getFakeDhcpPolicyv4OptionValueID168 = {
-#     return @{
-#         PolicyName    = $policyName
-#         OptionId      = 168
-#         Value         = $value
-#         ScopeId       = $scopeId
-#         VendorClass   = $vendorClass
-#         AddressFamily = $addressFamily
-#     }
-# }
-
-# $getFakeDhcpPolicyv4OptionValueDifferentValue = {
-#     return @{
-#         PolicyName    = $policyName
-#         OptionId      = $optionId
-#         Value         = @('DifferentValue')
-#         ScopeId       = $scopeId
-#         VendorClass   = $vendorClass
-#         AddressFamily = $addressFamily
-#     }
-# }
-
 Describe 'DSC_DhcpPolicyOptionValue\Get-TargetResource' -Tag 'Get' {
     BeforeAll {
         Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
@@ -126,7 +73,6 @@ Describe 'DSC_DhcpPolicyOptionValue\Get-TargetResource' -Tag 'Get' {
             }
         }
     }
-
 
     It 'Should return the correct values' {
         InModuleScope -ScriptBlock {
@@ -158,7 +104,6 @@ Describe 'DSC_DhcpPolicyOptionValue\Get-TargetResource' -Tag 'Get' {
         Should -Invoke -CommandName Get-TargetResourceHelper -Exactly -Times 1 -Scope It
     }
 }
-
 
 Describe 'DSC_DhcpPolicyOptionValue\Test-TargetResource' -Tag 'Test' {
     BeforeAll {
