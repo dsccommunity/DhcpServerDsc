@@ -147,44 +147,39 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
         }
     }
 
-    # Context 'When the ScopeID is not valid' {
-    #     BeforeAll {
-    #         Mock -CommandName Assert-Module
-    #         Mock -CommandName Get-ValidIPAddress -ParameterFilter {
-    #             $ParameterName -eq 'ScopeID'
-    #         } -MockWith {
-    #             return [System.Net.IPAddress]::Parse('192.168.1.0')
-    #         }
+    Context 'When the ScopeID is not valid' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ValidIPAddress -ParameterFilter {
+                $ParameterName -eq 'ScopeID'
+            } -MockWith {
+                return [System.Net.IPAddress]::Parse('192.168.1.0')
+            }
 
-    #         Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-    #             $PSCmdlet.WriteError([System.Management.Automation.ErrorRecord]::new(
-    #                     'MockError',
-    #                     'ERR001',
-    #                     [System.Management.Automation.ErrorCategory]::InvalidOperation,
-    #                     $ScopeID
-    #                 )
-    #             )
-    #         }
-    #     }
+            InModuleScope -ScriptBlock {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    Set-Variable -Name $PesterBoundParameters.ErrorVariable -Scope 3 -Value 'oh no'
+                }
+            }
+        }
 
-    #     It 'Should return the correct result' {
-    #         InModuleScope -ScriptBlock {
-    #             Set-StrictMode -Version 1.0
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-    #             $mockParams = @{
-    #                 ScopeID          = '192.168.1.0'
-    #                 ClientMACAddress = '00-15-5D-01-05-1B'
-    #                 IPAddress        = '192.168.1.30'
-    #                 AddressFamily    = 'IPv4'
-    #             }
+                $mockParams = @{
+                    ScopeID          = '192.168.1.0'
+                    ClientMACAddress = '00-15-5D-01-05-1B'
+                    IPAddress        = '192.168.1.30'
+                    AddressFamily    = 'IPv4'
+                }
 
-    #             $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $mockParams.ScopeID)
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $mockParams.ScopeID)
 
-    #             { Get-TargetResource @mockParams } | Should -Throw -ExpectedMessage $errorRecord
-
-    #         }
-    #     }
-    # }
+                { Get-TargetResource @mockParams } | Should -Throw -ExpectedMessage $errorRecord
+            }
+        }
+    }
 }
 
 Describe 'DSC_xDhcpServerReservation\Set-TargetResource' -Tag 'Set' {
@@ -263,7 +258,39 @@ Describe 'DSC_xDhcpServerReservation\Test-TargetResource' -Tag 'Test' {
         }
     }
 
-    # TODO: test Get-DhcpServerv4Scope error
+    Context 'When the ScopeID is not valid' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ValidIPAddress -ParameterFilter {
+                $ParameterName -eq 'ScopeID'
+            } -MockWith {
+                return [System.Net.IPAddress]::Parse('192.168.1.0')
+            }
+
+            InModuleScope -ScriptBlock {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    Set-Variable -Name $PesterBoundParameters.ErrorVariable -Scope 3 -Value 'oh no'
+                }
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockParams = @{
+                    ScopeID          = '192.168.1.0'
+                    ClientMACAddress = '00-15-5D-01-05-1B'
+                    IPAddress        = '192.168.1.30'
+                    AddressFamily    = 'IPv4'
+                }
+
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $mockParams.ScopeID)
+
+                { Test-TargetResource @mockParams } | Should -Throw -ExpectedMessage $errorRecord
+            }
+        }
+    }
 }
 
 Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
