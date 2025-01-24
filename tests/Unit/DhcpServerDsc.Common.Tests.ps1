@@ -258,25 +258,25 @@ Describe 'DhcpServerDsc.Common\Assert-ScopeParameter' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'SubnetMask'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('255.255.255.0')
+                return [System.Net.IPAddress] '255.255.255.0'
             }
 
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeId'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPStartRange'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.10')
+                return [System.Net.IPAddress] '192.168.1.10'
             }
 
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPEndRange'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.99')
+                return [System.Net.IPAddress] '192.168.1.99'
             }
         }
 
@@ -307,25 +307,25 @@ Describe 'DhcpServerDsc.Common\Assert-ScopeParameter' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'SubnetMask'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('255.255.255.0')
+                return [System.Net.IPAddress] '255.255.255.0'
             }
 
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeId'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPStartRange'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.100')
+                return [System.Net.IPAddress] '192.168.1.100'
             }
 
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPEndRange'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.99')
+                return [System.Net.IPAddress] '192.168.1.99'
             }
 
             Mock -CommandName New-TerminatingError -ParameterFilter {
@@ -381,32 +381,32 @@ Describe 'DhcpServerDsc.Common\Assert-ScopeParameter' {
                 Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                     $ParameterName -eq 'SubnetMask'
                 } -MockWith {
-                    return [System.Net.IPAddress]::Parse('255.255.255.0')
+                    return [System.Net.IPAddress] '255.255.255.0'
                 }
 
                 Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                     $ParameterName -eq 'ScopeId'
                 } -MockWith {
-                    return [System.Net.IPAddress]::Parse('192.168.1.0')
+                    return [System.Net.IPAddress] '192.168.1.0'
                 }
 
                 Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                     $ParameterName -eq 'IPStartRange'
                 } -MockWith {
-                    return [System.Net.IPAddress]::Parse('192.168.1.10')
+                    return [System.Net.IPAddress] '192.168.1.10'
                 }
 
                 Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                     $ParameterName -eq 'IPEndRange'
                 } -MockWith {
-                    return [System.Net.IPAddress]::Parse('192.168.1.99')
+                    return [System.Net.IPAddress] '192.168.1.99'
                 }
 
                 # Override the correct mock
                 Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                     $ParameterName -eq $Parameter
                 } -MockWith {
-                    return [System.Net.IPAddress]::Parse($Value)
+                    return [System.Net.IPAddress] $Value
                 }
 
                 Mock -CommandName New-TerminatingError -ParameterFilter {

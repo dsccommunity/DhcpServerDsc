@@ -61,14 +61,14 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeID'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             Mock -CommandName Get-DhcpServerv4Scope
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPAddress'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.30')
+                return [System.Net.IPAddress] '192.168.1.30'
             }
 
             Mock -CommandName Get-DhcpServerv4Reservation -MockWith {
@@ -110,14 +110,14 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeID'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             Mock -CommandName Get-DhcpServerv4Scope
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPAddress'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.30')
+                return [System.Net.IPAddress] '192.168.1.30'
             }
 
             Mock -CommandName Get-DhcpServerv4Reservation
@@ -153,7 +153,7 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeID'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             InModuleScope -ScriptBlock {
@@ -215,14 +215,14 @@ Describe 'DSC_xDhcpServerReservation\Test-TargetResource' -Tag 'Test' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeID'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             Mock -CommandName Get-DhcpServerv4Scope
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'IPAddress'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.30')
+                return [System.Net.IPAddress] '192.168.1.30'
             }
 
             Mock -CommandName Update-ResourceProperties -MockWith {
@@ -264,7 +264,7 @@ Describe 'DSC_xDhcpServerReservation\Test-TargetResource' -Tag 'Test' {
             Mock -CommandName Get-ValidIPAddress -ParameterFilter {
                 $ParameterName -eq 'ScopeID'
             } -MockWith {
-                return [System.Net.IPAddress]::Parse('192.168.1.0')
+                return [System.Net.IPAddress] '192.168.1.0'
             }
 
             InModuleScope -ScriptBlock {
