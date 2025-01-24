@@ -42,7 +42,7 @@ function Get-TargetResource
 
     if ($bindings.InterfaceAlias -inotcontains $InterfaceAlias)
     {
-        $errorMessage = $script:localizedData.InterfaceAliasIsMissing -f $InterfaceAlias, $env:COMPUTERNAME
+        $errorMessage = $script:localizedData.InterfaceAliasIsMissing -f $InterfaceAlias, (Get-ComputerName)
 
         New-ObjectNotFoundException -Message $errorMessage
     }
