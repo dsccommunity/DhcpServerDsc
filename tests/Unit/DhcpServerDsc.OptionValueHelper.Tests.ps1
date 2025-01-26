@@ -62,7 +62,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
     BeforeDiscovery {
         $testCases = @(
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Server'
                     OptionId      = 1
                     VendorClass   = ''
@@ -75,7 +75,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Scope'
                     OptionId      = 1
                     VendorClass   = ''
@@ -89,7 +89,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Policy'
                     OptionId      = 1
                     VendorClass   = ''
@@ -103,7 +103,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Policy'
                     OptionId      = 1
                     VendorClass   = ''
@@ -116,7 +116,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'ReservedIP'
                     OptionId      = 1
                     VendorClass   = ''
@@ -137,7 +137,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
     }
 
     Context 'When the the DhcpOption Exists' {
-        Context 'When ApplyTo is ''<mockParameters.ApplyTo>''' -ForEach $testCases {
+        Context 'When ApplyTo is ''<testParams.ApplyTo>''' -ForEach $testCases {
             BeforeAll {
                 Mock -CommandName Get-DhcpServerv4OptionValue -MockWith {
                     $mockResult
@@ -148,7 +148,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
                 InModuleScope -Parameters $_ -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
-                    $result = Get-TargetResourceHelper @mockParameters
+                    $result = Get-TargetResourceHelper @testParams
 
                     $result.Ensure | Should -Be 'Present'
                     $result.AddressFamily | Should -Be 'IPv4'
@@ -160,7 +160,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
     }
 
     Context 'When the the DhcpOption does not exist' {
-        Context 'When ApplyTo is ''<mockParameters.ApplyTo>''' -ForEach $testCases {
+        Context 'When ApplyTo is ''<testParams.ApplyTo>''' -ForEach $testCases {
             BeforeAll {
                 Mock -CommandName Get-DhcpServerv4OptionValue
             }
@@ -169,7 +169,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
                 InModuleScope -Parameters $_ -ScriptBlock {
                     Set-StrictMode -Version 1.0
 
-                    $result = Get-TargetResourceHelper @mockParameters
+                    $result = Get-TargetResourceHelper @testParams
 
                     $result.Ensure | Should -Be 'Absent'
                     $result.AddressFamily | Should -BeNullOrEmpty
@@ -185,7 +185,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
     BeforeDiscovery {
         $testCases = @(
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Server'
                     OptionId      = 1
                     VendorClass   = ''
@@ -199,7 +199,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Scope'
                     OptionId      = 1
                     VendorClass   = ''
@@ -214,7 +214,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Policy'
                     OptionId      = 1
                     VendorClass   = ''
@@ -229,7 +229,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'ReservedIP'
                     OptionId      = 1
                     VendorClass   = ''
@@ -246,10 +246,10 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
         )
     }
 
-    Context 'When the DhcpOption should exist and does for <mockParameters.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should exist and does for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -MockWith {
                 $mockResult
             }
@@ -261,21 +261,21 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
 
                 $mockResult.Ensure = 'Present'
 
-                $result = Test-TargetResourceHelper @mockParameters
+                $result = Test-TargetResourceHelper @testParams
 
                 $result | Should -BeTrue
             }
 
             Should -Invoke -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -Exactly -Times 1 -Scope It
         }
     }
 
-    Context 'When the DhcpOption should exist and does not for <mockParameters.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should exist and does not for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -MockWith {
                 @{
                     Ensure = 'Absent'
@@ -287,21 +287,21 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
             InModuleScope -Parameters $_ -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $result = Test-TargetResourceHelper @mockParameters
+                $result = Test-TargetResourceHelper @testParams
 
                 $result | Should -BeFalse
             }
 
             Should -Invoke -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -Exactly -Times 1 -Scope It
         }
     }
 
-    Context 'When the DhcpOption should not exist and does for <mockParameters.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should not exist and does for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -MockWith {
                 $mockResult
             }
@@ -311,24 +311,24 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
             InModuleScope -Parameters $_ -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParameters.Ensure = 'Absent'
+                $testParams.Ensure = 'Absent'
                 $mockResult.Ensure = 'Present'
 
-                $result = Test-TargetResourceHelper @mockParameters
+                $result = Test-TargetResourceHelper @testParams
 
                 $result | Should -BeFalse
             }
 
             Should -Invoke -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -Exactly -Times 1 -Scope It
         }
     }
 
-    Context 'When the DhcpOption should not exist and does for <mockParameters.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should not exist and does for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -MockWith {
                 @{
                     Ensure = 'Absent'
@@ -340,15 +340,15 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
             InModuleScope -Parameters $_ -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParameters.Ensure = 'Absent'
+                $testParams.Ensure = 'Absent'
 
-                $result = Test-TargetResourceHelper @mockParameters
+                $result = Test-TargetResourceHelper @testParams
 
                 $result | Should -BeTrue
             }
 
             Should -Invoke -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -Exactly -Times 1 -Scope It
         }
     }
@@ -358,7 +358,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
     BeforeDiscovery {
         $testCases = @(
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Server'
                     OptionId      = 1
                     VendorClass   = ''
@@ -372,7 +372,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Scope'
                     OptionId      = 1
                     VendorClass   = ''
@@ -388,7 +388,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Policy'
                     OptionId      = 1
                     VendorClass   = ''
@@ -403,7 +403,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'Policy'
                     OptionId      = 1
                     VendorClass   = ''
@@ -417,7 +417,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
                 }
             }
             @{
-                mockParameters = @{
+                testParams = @{
                     ApplyTo       = 'ReservedIP'
                     OptionId      = 1
                     VendorClass   = ''
@@ -433,10 +433,10 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
         )
     }
 
-    Context 'When the DhcpOption should exist for <mockParameters.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should exist for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -MockWith {
                 $mockResult
             }
@@ -450,21 +450,21 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
 
                 $mockResult.Ensure = 'Present'
 
-                $result = Set-TargetResourceHelper @mockParameters
+                $result = Set-TargetResourceHelper @testParams
             }
 
             Should -Invoke -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -Exactly -Times 1 -Scope It
 
             Should -Invoke -CommandName Set-DhcpServerv4OptionValue -Exactly -Times 1 -Scope It
         }
     }
 
-    Context 'When the DhcpOption should not exist for <mockParameters.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should not exist for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -MockWith {
                 $mockResult
             }
@@ -476,14 +476,14 @@ Describe 'DhcpServerDsc.OptionValueHelper\Set-TargetResourceHelper' {
             InModuleScope -Parameters $_ -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParameters.Ensure = 'Absent'
+                $testParams.Ensure = 'Absent'
                 $mockResult.Ensure = 'Present'
 
-                $result = Set-TargetResourceHelper @mockParameters
+                $result = Set-TargetResourceHelper @testParams
             }
 
             Should -Invoke -CommandName Get-TargetResourceHelper -ParameterFilter {
-                $ApplyTo -eq $mockParameters.ApplyTo
+                $ApplyTo -eq $testParams.ApplyTo
             } -Exactly -Times 1 -Scope It
 
             Should -Invoke -CommandName Remove-DhcpServerv4OptionValue -Exactly -Times 1 -Scope It

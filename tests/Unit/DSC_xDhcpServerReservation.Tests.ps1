@@ -84,21 +84,21 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParams = @{
+                $testParams = @{
                     ScopeID          = '192.168.1.0'
                     ClientMACAddress = '00-15-5D-01-05-1B'
                     IPAddress        = '192.168.1.30'
                     AddressFamily    = 'IPv4'
                 }
 
-                $result = Get-TargetResource @mockParams
+                $result = Get-TargetResource @testParams
 
                 $result | Should -BeOfType [System.Collections.Hashtable]
-                $result.ScopeID | Should -Be $mockParams.ScopeID
-                $result.IPAddress | Should -Be $mockParams.IPAddress
-                $result.ClientMACAddress | Should -Be $mockParams.ClientMACAddress
+                $result.ScopeID | Should -Be $testParams.ScopeID
+                $result.IPAddress | Should -Be $testParams.IPAddress
+                $result.ClientMACAddress | Should -Be $testParams.ClientMACAddress
                 $result.Name | Should -Be (Get-ComputerName)
-                $result.AddressFamily | Should -Be $mockParams.AddressFamily
+                $result.AddressFamily | Should -Be $testParams.AddressFamily
                 $result.Ensure | Should -Be 'Present'
             }
         }
@@ -127,21 +127,21 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParams = @{
+                $testParams = @{
                     ScopeID          = '192.168.1.0'
                     ClientMACAddress = '00-15-5D-01-05-1B'
                     IPAddress        = '192.168.1.30'
                     AddressFamily    = 'IPv4'
                 }
 
-                $result = Get-TargetResource @mockParams
+                $result = Get-TargetResource @testParams
 
                 $result | Should -BeOfType [System.Collections.Hashtable]
-                $result.ScopeID | Should -Be $mockParams.ScopeID
-                $result.IPAddress | Should -Be $mockParams.IPAddress
+                $result.ScopeID | Should -Be $testParams.ScopeID
+                $result.IPAddress | Should -Be $testParams.IPAddress
                 $result.ClientMACAddress | Should -BeNullOrEmpty
                 $result.Name | Should -BeNullOrEmpty
-                $result.AddressFamily | Should -Be $mockParams.AddressFamily
+                $result.AddressFamily | Should -Be $testParams.AddressFamily
                 $result.Ensure | Should -Be 'Absent'
             }
         }
@@ -167,16 +167,16 @@ Describe 'DSC_xDhcpServerReservation\Get-TargetResource' -Tag 'Get' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParams = @{
+                $testParams = @{
                     ScopeID          = '192.168.1.0'
                     ClientMACAddress = '00-15-5D-01-05-1B'
                     IPAddress        = '192.168.1.30'
                     AddressFamily    = 'IPv4'
                 }
 
-                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $mockParams.ScopeID)
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $testParams.ScopeID)
 
-                { Get-TargetResource @mockParams } | Should -Throw -ExpectedMessage $errorRecord
+                { Get-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord
             }
         }
     }
@@ -192,7 +192,7 @@ Describe 'DSC_xDhcpServerReservation\Set-TargetResource' -Tag 'Set' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParams = @{
+                $testParams = @{
                     ScopeID          = '192.168.1.0'
                     ClientMACAddress = '00-15-5D-01-05-1B'
                     IPAddress        = '192.168.1.10'
@@ -200,7 +200,7 @@ Describe 'DSC_xDhcpServerReservation\Set-TargetResource' -Tag 'Set' {
                     Debug            = $true
                 }
 
-                Set-TargetResource @mockParams
+                Set-TargetResource @testParams
             }
 
             Should -Invoke -CommandName Update-ResourceProperties -Exactly -Times 1 -Scope It
@@ -234,7 +234,7 @@ Describe 'DSC_xDhcpServerReservation\Test-TargetResource' -Tag 'Test' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParams = @{
+                $testParams = @{
                     ScopeID          = '192.168.1.0'
                     ClientMACAddress = '00-15-5D-01-05-1B'
                     IPAddress        = '192.168.1.30'
@@ -243,7 +243,7 @@ Describe 'DSC_xDhcpServerReservation\Test-TargetResource' -Tag 'Test' {
                     Debug            = $true
                 }
 
-                Test-TargetResource @mockParams
+                Test-TargetResource @testParams
             }
 
             Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
@@ -278,16 +278,16 @@ Describe 'DSC_xDhcpServerReservation\Test-TargetResource' -Tag 'Test' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                $mockParams = @{
+                $testParams = @{
                     ScopeID          = '192.168.1.0'
                     ClientMACAddress = '00-15-5D-01-05-1B'
                     IPAddress        = '192.168.1.30'
                     AddressFamily    = 'IPv4'
                 }
 
-                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $mockParams.ScopeID)
+                $errorRecord = Get-InvalidOperationRecord -Message ($script:localizedData.InvalidScopeIdMessage -f $testParams.ScopeID)
 
-                { Test-TargetResource @mockParams } | Should -Throw -ExpectedMessage $errorRecord
+                { Test-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorRecord
             }
         }
     }
@@ -311,7 +311,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                     InModuleScope -ScriptBlock {
                         Set-StrictMode -Version 1.0
 
-                        $mockParams = @{
+                        $testParams = @{
                             ScopeID          = '192.168.30.0'
                             ClientMACAddress = '00155D01051B'
                             IPAddress        = '192.168.30.10'
@@ -320,7 +320,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                             Ensure           = 'Present'
                         }
 
-                        Update-ResourceProperties @mockParams | Should -BeTrue
+                        Update-ResourceProperties @testParams | Should -BeTrue
                     }
 
                     Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -346,7 +346,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                         InModuleScope -Parameters $_ -ScriptBlock {
                             Set-StrictMode -Version 1.0
 
-                            $mockParams = @{
+                            $testParams = @{
                                 ScopeID          = '192.168.30.0'
                                 ClientMACAddress = '00155D01051B'
                                 IPAddress        = '192.168.30.10'
@@ -355,9 +355,9 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                                 Ensure           = 'Present'
                             }
 
-                            $mockParams.$Parameter = $Value
+                            $testParams.$Parameter = $Value
 
-                            Update-ResourceProperties @mockParams | Should -BeFalse
+                            Update-ResourceProperties @testParams | Should -BeFalse
                         }
 
                         Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -369,7 +369,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                         InModuleScope -ScriptBlock {
                             Set-StrictMode -Version 1.0
 
-                            $mockParams = @{
+                            $testParams = @{
                                 ScopeID          = '192.168.30.0'
                                 ClientMACAddress = '00155D01051B'
                                 IPAddress        = '192.168.30.10'
@@ -378,7 +378,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                                 Ensure           = 'Absent'
                             }
 
-                            Update-ResourceProperties @mockParams | Should -BeFalse
+                            Update-ResourceProperties @testParams | Should -BeFalse
                         }
 
                         Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -393,7 +393,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                     InModuleScope -ScriptBlock {
                         Set-StrictMode -Version 1.0
 
-                        $mockParams = @{
+                        $testParams = @{
                             ScopeID          = '192.168.30.0'
                             ClientMACAddress = '00155D01051B'
                             IPAddress        = '192.168.30.10'
@@ -403,7 +403,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                             Apply            = $true
                         }
 
-                        Update-ResourceProperties @mockParams
+                        Update-ResourceProperties @testParams
                     }
 
                     Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -434,7 +434,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                         InModuleScope -Parameters $_ -ScriptBlock {
                             Set-StrictMode -Version 1.0
 
-                            $mockParams = @{
+                            $testParams = @{
                                 ScopeID          = '192.168.30.0'
                                 ClientMACAddress = '00155D01051B'
                                 IPAddress        = '192.168.30.10'
@@ -444,9 +444,9 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                                 Apply            = $true
                             }
 
-                            $mockParams.$Parameter = $Value
+                            $testParams.$Parameter = $Value
 
-                            Update-ResourceProperties @mockParams
+                            Update-ResourceProperties @testParams
                         }
 
                         Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -464,7 +464,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                         InModuleScope -ScriptBlock {
                             Set-StrictMode -Version 1.0
 
-                            $mockParams = @{
+                            $testParams = @{
                                 ScopeID          = '192.168.30.0'
                                 ClientMACAddress = '00155D01051B'
                                 IPAddress        = '192.168.30.10'
@@ -474,7 +474,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                                 Apply            = $true
                             }
 
-                            Update-ResourceProperties @mockParams
+                            Update-ResourceProperties @testParams
                         }
 
                         Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -496,7 +496,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                     InModuleScope -ScriptBlock {
                         Set-StrictMode -Version 1.0
 
-                        $mockParams = @{
+                        $testParams = @{
                             ScopeID          = '192.168.30.0'
                             ClientMACAddress = '00155D01051B'
                             IPAddress        = '192.168.30.10'
@@ -505,7 +505,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                             Ensure           = 'Present'
                         }
 
-                        Update-ResourceProperties @mockParams | Should -BeFalse
+                        Update-ResourceProperties @testParams | Should -BeFalse
                     }
 
                     Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -517,7 +517,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                     InModuleScope -ScriptBlock {
                         Set-StrictMode -Version 1.0
 
-                        $mockParams = @{
+                        $testParams = @{
                             ScopeID          = '192.168.30.0'
                             ClientMACAddress = '00155D01051B'
                             IPAddress        = '192.168.30.10'
@@ -526,7 +526,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                             Ensure           = 'Absent'
                         }
 
-                        Update-ResourceProperties @mockParams | Should -BeTrue
+                        Update-ResourceProperties @testParams | Should -BeTrue
                     }
 
                     Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -545,7 +545,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                         InModuleScope -ScriptBlock {
                             Set-StrictMode -Version 1.0
 
-                            $mockParams = @{
+                            $testParams = @{
                                 ScopeID          = '192.168.30.0'
                                 ClientMACAddress = '00155D01051B'
                                 IPAddress        = '192.168.30.10'
@@ -555,7 +555,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                                 Apply            = $true
                             }
 
-                            Update-ResourceProperties @mockParams
+                            Update-ResourceProperties @testParams
                         }
 
                         Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
@@ -572,7 +572,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                         InModuleScope -ScriptBlock {
                             Set-StrictMode -Version 1.0
 
-                            $mockParams = @{
+                            $testParams = @{
                                 ScopeID          = '192.168.30.0'
                                 ClientMACAddress = '00155D01051B'
                                 IPAddress        = '192.168.30.10'
@@ -582,7 +582,7 @@ Describe 'DSC_xDhcpServerReservation\Update-ResourceProperties' -Tag 'Helper' {
                                 Apply            = $true
                             }
 
-                            { Update-ResourceProperties @mockParams } | Should -Throw
+                            { Update-ResourceProperties @testParams } | Should -Throw
                         }
 
                         Should -Invoke -CommandName Get-DhcpServerv4Reservation -Exactly -Times 1 -Scope It
