@@ -60,7 +60,7 @@ function Get-TargetResource
     {
         $errorMessage = $script:localizedData.InvalidStartAndEndRange
 
-        New-InvalidArgumentException -ArgumentName 'StartRange' -Message $errorMessage
+        New-ArgumentException -ArgumentName 'StartRange' -Message $errorMessage
     }
 
     # Retrieve exclusions for the scope
@@ -223,7 +223,7 @@ function Test-TargetResource
     {
         $errorMessage = $script:localizedData.InvalidStartAndEndRange
 
-        New-InvalidArgumentException -ArgumentName 'StartRange' -Message $errorMessage
+        New-ArgumentException -ArgumentName 'StartRange' -Message $errorMessage
     }
 
     # Retrieve exclusions for the scope
