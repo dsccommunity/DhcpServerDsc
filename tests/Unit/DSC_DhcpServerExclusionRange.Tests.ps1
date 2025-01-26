@@ -54,47 +54,6 @@ AfterAll {
     Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
 }
 
-$scopeId = '10.1.1.0'
-$ipStartRange = '10.1.1.10'
-$ipEndRange = '10.1.1.20'
-$addressFamily = 'IPv4'
-$ensure = 'Present'
-
-$testParams = @{
-    ScopeId       = $scopeId
-    IPStartRange  = $ipStartRange
-    IPEndRange    = $ipEndRange
-    AddressFamily = $addressFamily
-}
-
-$badRangeParams = @{
-    ScopeId       = $scopeId
-    IPStartRange  = $ipEndRange
-    IPEndRange    = $ipStartRange
-    AddressFamily = $addressFamily
-    Ensure        = $ensure
-}
-
-$getFakeDhcpExclusionRange = {
-    return @(
-        [PSCustomObject] @{
-            ScopeId    = $scopeId
-            StartRange = [IPAddress]$ipStartRange
-            EndRange   = [IPAddress]$ipEndRange
-        }
-    )
-}
-
-$getFakeDhcpExclusionRangeBadRange = {
-    return @(
-        [PSCustomObject] @{
-            ScopeId      = $scopeId
-            IPStartRange = [IPAddress]$ipEndRange
-            IPEndRange   = [IPAddress]$ipStartRange
-        }
-    )
-}
-
 Describe 'DhcpServerExclusionRange\Get-TargetResource' -Tag 'Get' {
     Context 'When the exclusion range exists' {
         BeforeAll {
