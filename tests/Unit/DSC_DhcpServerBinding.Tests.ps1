@@ -54,47 +54,6 @@ AfterAll {
     Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
 }
 
-
-$interfaceAlias = 'Ethernet'
-$ensure = 'Present'
-$ipAddress = '10.0.0.1'
-
-$testParamsPresent = @{
-    InterfaceAlias = 'Ethernet'
-    Ensure         = 'Present'
-}
-
-$testParamsAbsent = @{
-    InterfaceAlias = 'Ethernet'
-    Ensure         = 'Absent'
-}
-
-$badAliasParams = @{
-    InterfaceAlias = 'fake'
-    Ensure         = 'Present'
-}
-
-$setParamsAbsent = @{
-    BindingState   = $false
-    InterfaceAlias = 'Ethernet'
-}
-
-$bindingNotPreset = , @(
-    [PSCustomObject] @{
-        InterfaceAlias = 'Ethernet'
-        IPAddress      = [IPAddress] '10.0.0.1'
-        BindingState   = $false
-    }
-)
-
-$bindingPresent = , @(
-    [PSCustomObject] @{
-        InterfaceAlias = 'Ethernet'
-        IPAddress      = [IPAddress] '10.0.0.1'
-        BindingState   = $true
-    }
-)
-
 Describe 'DhcpServerBinding\Get-TargetResource' -Tag 'Get' {
     Context 'When the resource exists' {
         BeforeAll {
