@@ -1,175 +1,506 @@
-﻿# $script:dscModuleName = 'DhcpServerDsc'
-# $script:dscResourceName = 'DSC_DhcpServerExclusionRange'
+﻿# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-#     # Import the stub functions.
-#     Import-Module -Name "$PSScriptRoot/Stubs/DhcpServer_2016_OSBuild_14393_2395.psm1" -Force -DisableNameChecking
-# }
+BeforeAll {
+    $script:dscModuleName = 'DhcpServerDsc'
+    $script:dscResourceName = 'DSC_DhcpServerExclusionRange'
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-# Invoke-TestSetup
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '.\Stubs\DhcpServer_2016_OSBuild_14393_2395.psm1') -DisableNameChecking
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $scopeId = '10.1.1.0'
-#         $ipStartRange = '10.1.1.10'
-#         $ipEndRange = '10.1.1.20'
-#         $addressFamily = 'IPv4'
-#         $ensure = 'Present'
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
 
-#         $testParams = @{
-#             ScopeId       = $scopeId
-#             IPStartRange  = $ipStartRange
-#             IPEndRange    = $ipEndRange
-#             AddressFamily = $addressFamily
-#         }
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
 
-#         $badRangeParams = @{
-#             ScopeId       = $scopeId
-#             IPStartRange  = $ipEndRange
-#             IPEndRange    = $ipStartRange
-#             AddressFamily = $addressFamily
-#             Ensure        = $ensure
-#         }
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 
-#         $getFakeDhcpExclusionRange = {
-#             return @(
-#                 [PSCustomObject] @{
-#                     ScopeId    = $scopeId
-#                     StartRange = [IPAddress]$ipStartRange
-#                     EndRange   = [IPAddress]$ipEndRange
-#                 }
-#             )
-#         }
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 
-#         $getFakeDhcpExclusionRangeBadRange = {
-#             return @(
-#                 [PSCustomObject] @{
-#                     ScopeId      = $scopeId
-#                     IPStartRange = [IPAddress]$ipEndRange
-#                     IPEndRange   = [IPAddress]$ipStartRange
-#                 }
-#             )
-#         }
+    Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
+}
 
-#         Describe 'DhcpServerExclusionRange\Get-TargetResource' {
-#             Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith $getFakeDhcpExclusionRange
-#             Mock -CommandName Assert-Module
+$scopeId = '10.1.1.0'
+$ipStartRange = '10.1.1.10'
+$ipEndRange = '10.1.1.20'
+$addressFamily = 'IPv4'
+$ensure = 'Present'
 
-#             It 'Should call "Assert-Module" to ensure "DHCPServer" module is available' {
-#                 $result = Get-TargetResource @testParams
+$testParams = @{
+    ScopeId       = $scopeId
+    IPStartRange  = $ipStartRange
+    IPEndRange    = $ipEndRange
+    AddressFamily = $addressFamily
+}
 
-#                 Assert-MockCalled -CommandName Assert-Module
-#             }
+$badRangeParams = @{
+    ScopeId       = $scopeId
+    IPStartRange  = $ipEndRange
+    IPEndRange    = $ipStartRange
+    AddressFamily = $addressFamily
+    Ensure        = $ensure
+}
 
-#             It 'Returns a "System.Collections.Hashtable" object type' {
-#                 $result = Get-TargetResource @testParams
-#                 $result | Should -BeOfType [System.Collections.Hashtable]
-#             }
+$getFakeDhcpExclusionRange = {
+    return @(
+        [PSCustomObject] @{
+            ScopeId    = $scopeId
+            StartRange = [IPAddress]$ipStartRange
+            EndRange   = [IPAddress]$ipEndRange
+        }
+    )
+}
 
-#             It 'Returns all correct values' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith $getFakeDhcpExclusionRange
+$getFakeDhcpExclusionRangeBadRange = {
+    return @(
+        [PSCustomObject] @{
+            ScopeId      = $scopeId
+            IPStartRange = [IPAddress]$ipEndRange
+            IPEndRange   = [IPAddress]$ipStartRange
+        }
+    )
+}
 
-#                 $result = Get-TargetResource @testParams
-#                 $result.Ensure | Should -Be $ensure
-#                 $result.ScopeId | Should -Be $scopeId
-#                 $result.IPStartRange | Should -Be $ipStartRange
-#                 $result.IPEndRange | Should -Be $ipEndRange
-#                 $result.AddressFamily | Should -Be $addressFamily
-#             }
+Describe 'DhcpServerExclusionRange\Get-TargetResource' -Tag 'Get' {
+    Context 'When the exclusion range exists' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'ScopeId'
+            } -MockWith {
+                return [IPAddress] '10.1.1.0'
+            }
 
-#             It 'Returns the properties as $null when the exclusion does not exist' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange { return $null }
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'StartRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.10'
+            }
 
-#                 $result = Get-TargetResource @testParams
-#                 $result.Ensure | Should -Be 'Absent'
-#                 $result.ScopeId | Should -Be $scopeId
-#                 $result.IPStartRange | Should -Be $null
-#                 $result.IPEndRange | Should -Be $null
-#                 $result.AddressFamily | Should -Be $addressFamily
-#             }
-#         }
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'EndRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.20'
+            }
+
+            Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith {
+                return @(
+                    @{
+                        ScopeId    = '10.1.1.0'
+                        StartRange = [IPAddress] '10.1.1.10'
+                        EndRange   = [IPAddress] '10.1.1.20'
+                    }
+                )
+            }
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ScopeId       = '10.1.1.0'
+                    IPStartRange  = '10.1.1.10'
+                    IPEndRange    = '10.1.1.20'
+                    AddressFamily = 'IPv4'
+                }
+
+                $result = Get-TargetResource @testParams
+
+                $result | Should -BeOfType [System.Collections.Hashtable]
+                $result.ScopeId | Should -Be $testParams.ScopeId
+                $result.IPStartRange | Should -Be $testParams.IPStartRange
+                $result.IPEndRange | Should -Be $testParams.IPEndRange
+                $result.AddressFamily | Should -Be $testParams.AddressFamily
+                $result.Ensure | Should -Be 'Present'
+            }
+        }
+    }
+
+    Context 'When the exclusion range does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'ScopeId'
+            } -MockWith {
+                return [IPAddress] '10.1.1.0'
+            }
+
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'StartRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.10'
+            }
+
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'EndRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.20'
+            }
+
+            Mock -CommandName Get-DhcpServerv4ExclusionRange
+        }
+
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ScopeId       = '10.1.1.0'
+                    IPStartRange  = '10.1.1.10'
+                    IPEndRange    = '10.1.1.20'
+                    AddressFamily = 'IPv4'
+                }
+
+                $result = Get-TargetResource @testParams
+
+                $result | Should -BeOfType [System.Collections.Hashtable]
+                $result.ScopeId | Should -Be $testParams.ScopeId
+                # Key properties should be returned??
+                #$result.IPStartRange | Should -Be $testParams.IPStartRange
+                #$result.IPEndRange | Should -Be $testParams.IPEndRange
+
+                $result.IPStartRange | Should -BeNullOrEmpty
+                $result.IPEndRange | Should -BeNullOrEmpty
+                $result.AddressFamily | Should -Be $testParams.AddressFamily
+                $result.Ensure | Should -Be 'Absent'
+            }
+        }
+    }
+
+    Context 'When the exclusion range is invalid' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'ScopeId'
+            } -MockWith {
+                return [IPAddress] '10.1.1.0'
+            }
+
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'StartRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.20'
+            }
+
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'EndRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.10'
+            }
+        }
+
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ScopeId       = '10.1.1.0'
+                    IPStartRange  = '10.1.1.20'
+                    IPEndRange    = '10.1.1.10'
+                    AddressFamily = 'IPv4'
+                }
+
+                $errorMessageParams = @{
+                    ArgumentName = 'StartRange'
+                    Message      = $script:localizedData.InvalidStartAndEndRange
+                }
+
+                $errorMessage = Get-InvalidArgumentRecord @errorMessageParams
+
+                { Get-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorMessage
+            }
+        }
+    }
+}
 
 
-#         Describe 'DhcpServerExclusionRange\Test-TargetResource' {
-#             Mock -CommandName Assert-Module
+Describe 'DhcpServerExclusionRange\Test-TargetResource' -Tag 'Test' {
+    Context 'When the resource exists' {
+        Context 'When the resource should exist' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'StartRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.10'
+                }
 
-#             It 'Returns a "System.Boolean" object type' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith $getFakeDhcpExclusionRange
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'EndRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.20'
+                }
 
-#                 $result = Test-TargetResource @testParams -Ensure 'Present'
-#                 $result | Should -BeOfType [System.Boolean]
-#             }
+                Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith {
+                    return @(
+                        @{
+                            ScopeId    = '10.1.1.0'
+                            StartRange = [IPAddress] '10.1.1.10'
+                            EndRange   = [IPAddress] '10.1.1.20'
+                        }
+                    )
+                }
+            }
 
-#             It 'Returns $true when the exclusion exists and Ensure = Present' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith $getFakeDhcpExclusionRange
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 $result = Test-TargetResource @testParams -Ensure 'Present'
-#                 $result | Should -Be $true
-#             }
+                    $testParams = @{
+                        ScopeId       = '10.1.1.0'
+                        IPStartRange  = '10.1.1.10'
+                        IPEndRange    = '10.1.1.20'
+                        AddressFamily = 'IPv4'
+                        Ensure        = 'Present'
+                    }
 
-#             It 'Returns $false when the exclusion does not exist and Ensure = Present' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange { return $null }
+                    Test-TargetResource @testParams | Should -BeTrue
+                }
+            }
+        }
 
-#                 $result = Test-TargetResource @testParams -Ensure 'Present'
-#                 $result | Should -Be $false
-#             }
+        Context 'When the resource should not exist' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'StartRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.10'
+                }
 
-#             It 'Returns $false when the exclusion exists and Ensure = Absent ' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith $getFakeDhcpExclusionRange
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'EndRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.20'
+                }
 
-#                 $result = Test-TargetResource @testParams -Ensure 'Absent'
-#                 $result | Should -Be $false
-#             }
+                Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith {
+                    return @(
+                        @{
+                            ScopeId    = '10.1.1.0'
+                            StartRange = [IPAddress] '10.1.1.10'
+                            EndRange   = [IPAddress] '10.1.1.20'
+                        }
+                    )
+                }
+            }
 
-#             It 'Throws RangeNotCorrect exception when the start range is greater than the end range' {
-#                 { Test-TargetResource @badRangeParams } | Should -Throw 'StartRange must be less than EndRange'
-#             }
-#         }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#         Describe 'DhcpServerExclusionRange\Set-TargetResource' {
-#             Mock -CommandName Assert-Module
-#             Mock -CommandName Add-DhcpServerv4ExclusionRange
-#             Mock -CommandName Remove-DhcpServerv4ExclusionRange
+                    $testParams = @{
+                        ScopeId       = '10.1.1.0'
+                        IPStartRange  = '10.1.1.10'
+                        IPEndRange    = '10.1.1.20'
+                        AddressFamily = 'IPv4'
+                        Ensure        = 'Absent'
+                    }
 
-#             It 'Should call "Add-DhcpServerv4ExclusionRange" when "Ensure" = "Present" and exclusion does not exist' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange { return $null }
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
+    }
 
-#                 Set-TargetResource @testParams -Ensure 'Present'
-#                 Assert-MockCalled -CommandName Add-DhcpServerv4ExclusionRange
-#             }
+    Context 'When the resource does not exist' {
+        Context 'When the resource should exist' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'StartRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.10'
+                }
 
-#             It 'Should call "Remove-DhcpServerv4ExclusionRange" when "Ensure" = "Absent" and exclusion does exist' {
-#                 Mock -CommandName Get-DhcpServerv4ExclusionRange -MockWith $getFakeDhcpExclusionRange
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'EndRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.20'
+                }
 
-#                 Set-TargetResource @testParams -Ensure 'Absent'
-#                 Assert-MockCalled -CommandName Remove-DhcpServerv4ExclusionRange
-#             }
-#         }
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+                Mock -CommandName Get-DhcpServerv4ExclusionRange
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ScopeId       = '10.1.1.0'
+                        IPStartRange  = '10.1.1.10'
+                        IPEndRange    = '10.1.1.20'
+                        AddressFamily = 'IPv4'
+                        Ensure        = 'Present'
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
+
+        Context 'When the resource should not exist' {
+            BeforeAll {
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'StartRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.10'
+                }
+
+                Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                    $ParameterName -eq 'EndRange'
+                } -MockWith {
+                    return [IPAddress] '10.1.1.20'
+                }
+
+                Mock -CommandName Get-DhcpServerv4ExclusionRange
+            }
+
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ScopeId       = '10.1.1.0'
+                        IPStartRange  = '10.1.1.10'
+                        IPEndRange    = '10.1.1.20'
+                        AddressFamily = 'IPv4'
+                        Ensure        = 'Absent'
+                    }
+
+                    Test-TargetResource @testParams | Should -BeTrue
+                }
+            }
+        }
+    }
+
+    Context 'When the exclusion range is invalid' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'StartRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.20'
+            }
+
+            Mock -CommandName Get-ValidIpAddress -ParameterFilter {
+                $ParameterName -eq 'EndRange'
+            } -MockWith {
+                return [IPAddress] '10.1.1.10'
+            }
+        }
+
+        It 'Should throw the correct exception' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ScopeId       = '10.1.1.0'
+                    IPStartRange  = '10.1.1.20'
+                    IPEndRange    = '10.1.1.10'
+                    AddressFamily = 'IPv4'
+                    Ensure        = 'Present'
+                }
+
+                $errorMessageParams = @{
+                    ArgumentName = 'StartRange'
+                    Message      = $script:localizedData.InvalidStartAndEndRange
+                }
+
+                $errorMessage = Get-InvalidArgumentRecord @errorMessageParams
+
+                { Test-TargetResource @testParams } | Should -Throw -ExpectedMessage $errorMessage
+            }
+        }
+    }
+}
+
+Describe 'DhcpServerExclusionRange\Set-TargetResource' -Tag 'Set' {
+    Context 'When the exclusion range should be created' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Add-DhcpServerv4ExclusionRange
+        }
+
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ScopeId       = '10.1.1.0'
+                    IPStartRange  = '10.1.1.10'
+                    IPEndRange    = '10.1.1.20'
+                    AddressFamily = 'IPv4'
+                    Ensure        = 'Present'
+                }
+
+                Set-TargetResource @testParams
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Add-DhcpServerv4ExclusionRange -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When the exclusion range should be created' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Remove-DhcpServerv4ExclusionRange
+        }
+
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    ScopeId       = '10.1.1.0'
+                    IPStartRange  = '10.1.1.10'
+                    IPEndRange    = '10.1.1.20'
+                    AddressFamily = 'IPv4'
+                    Ensure        = 'Absent'
+                }
+
+                Set-TargetResource @testParams
+            }
+
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Remove-DhcpServerv4ExclusionRange -Exactly -Times 1 -Scope It
+        }
+    }
+}
