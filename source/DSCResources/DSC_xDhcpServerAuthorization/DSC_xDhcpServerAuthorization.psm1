@@ -110,9 +110,14 @@ function Set-TargetResource
     {
         Write-Verbose ($script:localizedData.UnauthorizingServer -f $DnsName, $IPAddress)
 
-        Get-DhcpServerInDC | Where-Object -FilterScript {
+        $dhcpServers = Get-DhcpServerInDC | Where-Object -FilterScript {
             ($_.DnsName -eq $DnsName) -and ($_.IPAddress -eq $IPAddress)
-        } | Remove-DhcpServerInDc
+        }
+
+        foreach ($dhcpServer in $dhcpServers)
+        {
+            Remove-DhcpServerInDc -DnsName $dhcpServer.DnsName -IPAddress $dhcpServer.IPAddress
+        }
     }
 }
 
