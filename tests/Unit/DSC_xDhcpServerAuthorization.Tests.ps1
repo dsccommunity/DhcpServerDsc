@@ -264,7 +264,23 @@ Describe 'DSC_xDhcpServerAuthorization\Set-TargetResource' -Tag 'Set' {
     Context 'When the resource should be removed' {
         BeforeAll {
             Mock -CommandName Assert-Module
-            Mock -CommandName Get-DhcpServerInDc
+            Mock -CommandName Get-DhcpServerInDc -MockWith {
+                return @(
+                    @{
+                        IPAddress = '192.168.1.1'
+                        DnsName   = 'test1.contoso.com'
+                    },
+                    @{
+                        IPAddress = '192.168.1.2'
+                        DnsName   = 'test2.contoso.com'
+                    },
+                    @{
+                        IPAddress = '192.168.1.3'
+                        DnsName   = 'test3.contoso.com'
+                    }
+                )
+            }
+            
             Mock -CommandName Remove-DhcpServerInDc
         }
 
