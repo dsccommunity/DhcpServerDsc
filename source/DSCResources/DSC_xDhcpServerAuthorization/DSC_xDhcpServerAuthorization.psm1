@@ -25,7 +25,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DnsName = (Get-Hostname),
+        $DnsName = (Get-ComputerName),
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -34,7 +34,7 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message (
-        $script:localizedData.GetServerAuthorizationMessage -f $ScopeId
+        $script:localizedData.GetServerAuthorizationMessage -f $DnsName
     )
 
     Assert-Module -ModuleName 'DHCPServer'
@@ -84,7 +84,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DnsName = (Get-Hostname),
+        $DnsName = (Get-ComputerName),
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -93,7 +93,7 @@ function Set-TargetResource
     )
 
     Write-Verbose -Message (
-        $script:localizedData.SetServerAuthorizationMessage -f $ScopeId
+        $script:localizedData.SetServerAuthorizationMessage -f $DnsName
     )
 
     Assert-Module -ModuleName 'DHCPServer'
@@ -135,7 +135,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DnsName = (Get-Hostname),
+        $DnsName = (Get-ComputerName),
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -144,7 +144,7 @@ function Test-TargetResource
     )
 
     Write-Verbose -Message (
-        $script:localizedData.TestServerAuthorizationMessage -f $ScopeId
+        $script:localizedData.TestServerAuthorizationMessage -f $DnsName
     )
 
     $targetResource = Get-TargetResource @PSBoundParameters
@@ -198,7 +198,7 @@ function Get-IPv4Address
             Where-Object -FilterScript {
                 $_.IPEnabled -eq 'True' -and $_.IPAddress -notmatch ':'
             } |
-                Select-Object -ExpandProperty 'IPAddress'
+            Select-Object -ExpandProperty 'IPAddress'
     } #end process
 } #end function Get-IPv4Address
 
