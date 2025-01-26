@@ -54,29 +54,6 @@ AfterAll {
     Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
 }
 
-$testClassName = 'Test Class'
-$testClassType = 'Vendor'
-$testAsciiData = 'test data'
-$testClassDescription = 'test class description'
-$testClassAddressFamily = 'IPv4'
-
-$testParams = @{
-    Name          = 'Test Class'
-    Type          = 'Vendor'
-    AsciiData     = 'test data'
-    AddressFamily = 'IPv4'
-    Description   = 'test class description'
-    Verbose       = $true
-}
-
-$fakeDhcpServerClass = [PSCustomObject] @{
-    Name          = 'Test Class'
-    Type          = 'Vendor'
-    AsciiData     = 'test data'
-    Description   = 'test class description'
-    AddressFamily = 'IPv4'
-}
-
 Describe 'DSC_xDhcpServerClass\Get-TargetResource' -Tag 'Get' {
     Context 'When the resource exists' {
         BeforeAll {
@@ -150,19 +127,19 @@ Describe 'DSC_xDhcpServerClass\Get-TargetResource' -Tag 'Get' {
 
 Describe 'DSC_xDhcpServerClass\Test-TargetResource' -Tag 'Test' {
     Context 'When the resource is in the desired state' {
-        BeforeAll {
-            Mock -CommandName Get-DhcpServerv4Class -MockWith {
-                return @{
-                    Name          = 'Test Class'
-                    Type          = 'Vendor'
-                    AsciiData     = 'test data'
-                    Description   = 'test class description'
-                    AddressFamily = 'IPv4'
+        Context 'When the resource should be present' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Class -MockWith {
+                    return @{
+                        Name          = 'Test Class'
+                        Type          = 'Vendor'
+                        AsciiData     = 'test data'
+                        Description   = 'test class description'
+                        AddressFamily = 'IPv4'
+                    }
                 }
             }
-        }
 
-        Context 'When the resource should be present' {
             It 'Should return the correct result' {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
@@ -206,19 +183,19 @@ Describe 'DSC_xDhcpServerClass\Test-TargetResource' -Tag 'Test' {
     }
 
     Context 'When the resource is not in the desired state' {
-        BeforeAll {
-            Mock -CommandName Get-DhcpServerv4Class -MockWith {
-                return @{
-                    Name          = 'Test Class'
-                    Type          = 'Vendor'
-                    AsciiData     = 'test data'
-                    Description   = 'test class description'
-                    AddressFamily = 'IPv4'
+        Context 'When one property is incorrect' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Class -MockWith {
+                    return @{
+                        Name          = 'Test Class'
+                        Type          = 'Vendor'
+                        AsciiData     = 'test data'
+                        Description   = 'test class description'
+                        AddressFamily = 'IPv4'
+                    }
                 }
             }
-        }
 
-        Context 'When one property is incorrect' {
             It 'Should return the correct result' {
                 InModuleScope -ScriptBlock {
                     Set-StrictMode -Version 1.0
@@ -236,50 +213,160 @@ Describe 'DSC_xDhcpServerClass\Test-TargetResource' -Tag 'Test' {
                 }
             }
         }
+
+        Context 'When the resource should exist but does not' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Class
+            }
+
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        Name          = 'Test Class'
+                        Type          = 'Vendor'
+                        AsciiData     = 'test data'
+                        AddressFamily = 'IPv4'
+                        Description   = 'test class description'
+                        Ensure        = 'Present'
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
+
+        Context 'When the resource should not exist but does' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Class -MockWith {
+                    return @{
+                        Name          = 'Test Class'
+                        Type          = 'Vendor'
+                        AsciiData     = 'test data'
+                        Description   = 'test class description'
+                        AddressFamily = 'IPv4'
+                    }
+                }
+            }
+
+            It 'Should return $false' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        Name          = 'Test Class'
+                        Type          = 'Vendor'
+                        AsciiData     = 'test data'
+                        AddressFamily = 'IPv4'
+                        Description   = 'test class description'
+                        Ensure        = 'Absent'
+                    }
+
+                    Test-TargetResource @testParams | Should -BeFalse
+                }
+            }
+        }
     }
 }
 
-# Describe 'DSC_xDhcpServerClass\Set-TargetResource' {
-#     BeforeAll {
-#         Mock -CommandName Assert-Module
-#     }
+Describe 'DSC_xDhcpServerClass\Set-TargetResource' {
+    Context 'When a resource needs creating' {
+        BeforeAll {
+            Mock -CommandName Get-DhcpServerv4Class
+            Mock -CommandName Add-DhcpServerv4Class
+        }
 
-#     It 'Calls "Add-DhcpServerv4Class" when "Ensure" = "Present" and class does not exist' {
-#         Mock -CommandName Get-DhcpServerv4Class -MockWith {
-#             return $null
-#         }
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         Mock -CommandName Set-DhcpServerv4Class
-#         Mock -CommandName Add-DhcpServerv4Class
+                $testParams = @{
+                    Name          = 'Test Class'
+                    Type          = 'Vendor'
+                    AsciiData     = 'test data'
+                    AddressFamily = 'IPv4'
+                    Description   = 'test class description'
+                    Ensure        = 'Present'
+                }
 
-#         Set-TargetResource @testParams -Ensure Present
+                Set-TargetResource @testParams
+            }
 
-#         Assert-MockCalled -CommandName Add-DhcpServerv4Class -Exactly -Times 1 -Scope It
-#     }
+            Should -Invoke -CommandName Get-DhcpServerv4Class -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Add-DhcpServerv4Class -Exactly -Times 1 -Scope It
+        }
+    }
 
-#     It 'Calls "Remove-DhcpServerv4Class" when "Ensure" = "Absent" and scope does exist' {
-#         Mock -CommandName Get-DhcpServerv4Class -MockWith {
-#             return $fakeDhcpServerClass
-#         }
+    Context 'When a resource needs updating' {
+        BeforeAll {
+            Mock -CommandName Get-DhcpServerv4Class -MockWith {
+                return @{
+                    Name          = 'Test Class'
+                    Type          = 'Vendor'
+                    AsciiData     = 'test data'
+                    Description   = 'test class description'
+                    AddressFamily = 'IPv4'
+                }
+            }
 
-#         Mock -CommandName Remove-DhcpServerv4Class
+            Mock -CommandName Set-DhcpServerv4Class
+        }
 
-#         Set-TargetResource @testParams -Ensure 'Absent'
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#         Assert-MockCalled -CommandName Remove-DhcpServerv4Class -Exactly -Times 1 -Scope It
-#     }
+                $testParams = @{
+                    Name          = 'Test Class'
+                    Type          = 'Vendor'
+                    AsciiData     = 'test data'
+                    AddressFamily = 'IPv4'
+                    Description   = 'test class description'
+                    Ensure        = 'Present'
+                }
 
-#     It 'Calls Set-DhcpServerv4Class when asciidata changes' {
-#         Mock -CommandName Get-DhcpServerv4Class -MockWith {
-#             return $fakeDhcpServerClass
-#         }
+                Set-TargetResource @testParams
+            }
 
-#         Mock -CommandName Set-DhcpServerv4Class
+            Should -Invoke -CommandName Get-DhcpServerv4Class -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-DhcpServerv4Class -Exactly -Times 1 -Scope It
+        }
+    }
 
-#         $testParams.AsciiData = 'differentdata'
+    Context 'When a resource needs deleting' {
+        BeforeAll {
+            Mock -CommandName Get-DhcpServerv4Class -MockWith {
+                return @{
+                    Name          = 'Test Class'
+                    Type          = 'Vendor'
+                    AsciiData     = 'test data'
+                    Description   = 'test class description'
+                    AddressFamily = 'IPv4'
+                }
+            }
 
-#         Set-TargetResource @testParams -Ensure 'Present'
+            Mock -CommandName Remove-DhcpServerv4Class
+        }
 
-#         Assert-MockCalled -CommandName Set-DhcpServerv4Class -Exactly -Times 1 -Scope It
-#     }
-# }
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $testParams = @{
+                    Name          = 'Test Class'
+                    Type          = 'Vendor'
+                    AsciiData     = 'test data'
+                    AddressFamily = 'IPv4'
+                    Description   = 'test class description'
+                    Ensure        = 'Absent'
+                }
+
+                Set-TargetResource @testParams
+            }
+
+            Should -Invoke -CommandName Get-DhcpServerv4Class -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Remove-DhcpServerv4Class -Exactly -Times 1 -Scope It
+        }
+    }
+}
