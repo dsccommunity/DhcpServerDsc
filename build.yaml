@@ -78,7 +78,7 @@ Pester:
       StackTraceVerbosity: Full
       CIFormat: Auto
     CodeCoverage:
-      CoveragePercentTarget: 65
+      CoveragePercentTarget: 85
       OutputPath: CodeCoverage.xml
       OutputEncoding: ascii
       UseBreakpoints: false
