@@ -1,337 +1,578 @@
-# $script:dscModuleName = 'DhcpServerDsc'
-# $script:dscResourceName = 'DSC_xDhcpServerScope'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-#     # Import the stub functions.
-#     Import-Module -Name "$PSScriptRoot/Stubs/DhcpServer_2016_OSBuild_14393_2395.psm1" -Force -DisableNameChecking
-# }
+BeforeAll {
+    $script:dscModuleName = 'DhcpServerDsc'
+    $script:dscResourceName = 'DSC_xDhcpServerScope'
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-# Invoke-TestSetup
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '.\Stubs\DhcpServer_2016_OSBuild_14393_2395.psm1') -DisableNameChecking
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         $testScopeName = 'Test Scope'
-#         $testScopeID = '192.168.1.0'
-#         $testIPStartRange = '192.168.1.10'
-#         $testIPEndRange = '192.168.1.99'
-#         $testSubnetMask = '255.255.255.0'
-#         $testState = 'Active'
-#         $testLeaseDuration = New-TimeSpan -Days 8
-#         $testDescription = 'Scope description'
-#         $testAddressFamily = 'IPv4'
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
+}
 
-#         $testParams = @{
-#             ScopeId      = $testScopeID
-#             Name         = $testScopeName
-#             IPStartRange = $testIPStartRange
-#             IPEndRange   = $testIPEndRange
-#             SubnetMask   = $testSubnetMask
-#             Verbose      = $true
-#         }
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
 
-#         $fakeDhcpServerv4Scope = [PSCustomObject] @{
-#             ScopeID       = $testScopeID
-#             Name          = $testScopeName
-#             StartRange    = $testIPStartRange
-#             EndRange      = $testIPEndRange
-#             Description   = $testDescription
-#             SubnetMask    = $testSubnetMask
-#             LeaseDuration = $testLeaseDuration
-#             State         = $testState
-#             AddressFamily = $testAddressFamily
-#         }
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 
-#         Describe 'DSC_xDhcpServerScope\Get-TargetResource' {
-#             BeforeAll {
-#                 Mock -CommandName Assert-Module
-#             }
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
 
-#             Mock -CommandName Assert-ScopeParameter -ParameterFilter {
-#                 $ScopeId -eq $testScopeID -and
-#                 $SubnetMask -eq $testSubnetMask -and
-#                 $IPStartRange -eq $testIPStartRange -and
-#                 $IPEndRange -eq $testIPEndRange -and
-#                 $AddressFamily -eq $testAddressFamily
-#             }
+    Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
+}
 
-#             It 'Should call "Assert-Module" to ensure "DHCPServer" module is available' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-#                 { Get-TargetResource @testParams } | Should -Not -Throw
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-#                 Assert-MockCalled -CommandName Assert-Module -ParameterFilter {
-#                     $ModuleName -eq 'DHCPServer'
-#                 } -Exactly -Times 1 -Scope It
-#             }
+    # Import the stub functions.
+    Import-Module -Name "$PSScriptRoot/Stubs/DhcpServer_2016_OSBuild_14393_2395.psm1" -Force -DisableNameChecking
+}
 
-#             It 'Should call "Assert-ScopeParameter" to ensure parameters passed are correct' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+$testScopeName = 'Test Scope'
+$testScopeID = '192.168.1.0'
+$testIPStartRange = '192.168.1.10'
+$testIPEndRange = '192.168.1.99'
+$testSubnetMask = '255.255.255.0'
+$testState = 'Active'
+$testLeaseDuration = New-TimeSpan -Days 8
+$testDescription = 'Scope description'
+$testAddressFamily = 'IPv4'
 
-#                 $result = Get-TargetResource @testParams
+$testParams = @{
+    ScopeId      = '192.168.1.0'
+    Name         = 'Test Scope'
+    IPStartRange = '192.168.1.10'
+    IPEndRange   = '192.168.1.99'
+    SubnetMask   = '255.255.255.0'
+    Verbose      = $true
+}
 
-#                 Assert-MockCalled -CommandName Assert-Module -Exactly -Times 1 -Scope It
-#             }
+$fakeDhcpServerv4Scope = [PSCustomObject] @{
+    ScopeID       = '192.168.1.0'
+    Name          = 'Test Scope'
+    StartRange    = '192.168.1.10'
+    EndRange      = '192.168.1.99'
+    Description   = 'Scope description'
+    SubnetMask    = '255.255.255.0'
+    LeaseDuration = New-TimeSpan -Days 8
+    State         = 'Active'
+    AddressFamily = 'IPv4'
+}
 
-#             It 'Should return a "System.Collections.Hashtable" object type' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+Describe 'DSC_xDhcpServerScope\Get-TargetResource' -Tag 'Get' {
+    Context 'When the resource exists' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-ScopeParameter
+            Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                return @{
+                    ScopeID       = '192.168.1.0'
+                    Name          = 'Test Scope'
+                    StartRange    = '192.168.1.10'
+                    EndRange      = '192.168.1.99'
+                    Description   = 'Scope description'
+                    SubnetMask    = '255.255.255.0'
+                    LeaseDuration = New-TimeSpan -Days 8
+                    State         = 'Active'
+                    AddressFamily = 'IPv4'
+                }
+            }
+        }
 
-#                 Get-TargetResource @testParams | Should -BeOfType System.Collections.Hashtable
-#             }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#             It 'Should return all information about existing scope with specified ScopeId' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+                $testParams = @{
+                    ScopeId      = '192.168.1.0'
+                    Name         = 'Test Scope'
+                    IPStartRange = '192.168.1.10'
+                    IPEndRange   = '192.168.1.99'
+                    SubnetMask   = '255.255.255.0'
+                }
 
-#                 $result = Get-TargetResource @testParams
+                $result = Get-TargetResource @testParams
 
-#                 $result.Name | Should -Be $testScopeName
-#                 $result.IPStartRange | Should -Be $testIPStartRange
-#                 $result.IPEndRange | Should -Be $testIPEndRange
-#                 $result.SubnetMask | Should -Be $testSubnetMask
-#                 $result.Description | Should -Be $testDescription
-#                 $result.LeaseDuration | Should -Be $testLeaseDuration
-#                 $result.State | Should -Be $testState
-#                 $result.AddressFamily | Should -Be $testAddressFamily
-#                 $result.Ensure | Should -Be Present
-#             }
+                $result.Name | Should -Be $testParams.Name
+                $result.IPStartRange | Should -Be $testParams.IPStartRange
+                $result.IPEndRange | Should -Be $testParams.IPEndRange
+                $result.SubnetMask | Should -Be $testParams.SubnetMask
+                $result.Description | Should -Be 'Scope description'
+                $result.LeaseDuration | Should -Be (New-TimeSpan -Days 8)
+                $result.State | Should -Be 'Active'
+                $result.AddressFamily | Should -Be 'Ipv4'
+                $result.Ensure | Should -Be Present
+            }
+        }
+    }
 
-#             It 'Should return basic information about missing scope with specified ScopeId' {
-#                 Mock -CommandName Get-DhcpServerv4Scope
+    Context 'When the resource does not exist' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-ScopeParameter
+            Mock -CommandName Get-DhcpServerv4Scope
+        }
 
-#                 $result = Get-TargetResource @testParams
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 $result.Name | Should -BeNullOrEmpty
-#                 $result.IPStartRange | Should -BeNullOrEmpty
-#                 $result.IPEndRange | Should -BeNullOrEmpty
-#                 $result.SubnetMask | Should -BeNullOrEmpty
-#                 $result.Description | Should -BeNullOrEmpty
-#                 $result.LeaseDuration | Should -BeNullOrEmpty
-#                 $result.State | Should -BeNullOrEmpty
-#                 $result.AddressFamily | Should -Be $testAddressFamily
-#                 $result.Ensure | Should -Be Absent
-#             }
-#         }
+                $testParams = @{
+                    ScopeId      = '192.168.1.0'
+                    Name         = 'Test Scope'
+                    IPStartRange = '192.168.1.10'
+                    IPEndRange   = '192.168.1.99'
+                    SubnetMask   = '255.255.255.0'
+                }
 
-#         Describe 'DSC_xDhcpServerScope\Test-TargetResource' {
-#             BeforeAll {
-#                 Mock -CommandName Assert-Module
-#             }
+                $result = Get-TargetResource @testParams
 
-#             It 'Should return a "System.Boolean" object type' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+                $result.Name | Should -BeNullOrEmpty
+                $result.IPStartRange | Should -BeNullOrEmpty
+                $result.IPEndRange | Should -BeNullOrEmpty
+                $result.SubnetMask | Should -BeNullOrEmpty
+                $result.Description | Should -BeNullOrEmpty
+                $result.LeaseDuration | Should -BeNullOrEmpty
+                $result.State | Should -BeNullOrEmpty
+                $result.AddressFamily | Should -Be 'IPv4'
+                $result.Ensure | Should -Be Absent
+            }
+        }
+    }
+}
 
-#                 Test-TargetResource @testParams | Should -BeOfType System.Boolean
-#             }
+Describe 'DSC_xDhcpServerScope\Test-TargetResource' -Tag 'Test' {
+    Context 'When the resource is in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-ScopeParameter
+            Mock -CommandName Update-ResourceProperties -MockWith {
+                return $true
+            }
+        }
 
-#             It 'Should pass when all parameters are correct' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 Test-TargetResource @testParams | Should -BeTrue
-#             }
+                $testParams = @{
+                    ScopeId       = '192.168.1.0'
+                    Name          = 'Test Scope'
+                    IPStartRange  = '192.168.1.10'
+                    IPEndRange    = '192.168.1.99'
+                    SubnetMask    = '255.255.255.0'
+                    AddressFamily = 'IPv4'
+                    Debug         = $true
+                }
 
-#             It 'Should pass when optional <Parameter> parameter is correct' {
-#                 param
-#                 (
-#                     [Parameter()]
-#                     $Parameter,
+                Test-TargetResource @testParams | Should -BeTrue
+            }
+        }
+    }
 
-#                     [Parameter()]
-#                     $Value
-#                 )
+    Context 'When the resource is not in the desired state' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-ScopeParameter
+            Mock -CommandName Update-ResourceProperties -MockWith {
+                return $false
+            }
+        }
 
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+        It 'Should return the correct result' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#                 $optionalParameters = @{
-#                     $Parameter = $Value
-#                 }
+                $testParams = @{
+                    ScopeId       = '192.168.1.0'
+                    Name          = 'Test Scope'
+                    IPStartRange  = '192.168.1.10'
+                    IPEndRange    = '192.168.1.99'
+                    SubnetMask    = '255.255.255.0'
+                    AddressFamily = 'IPv4'
+                    Debug         = $true
+                }
 
-#                 Test-TargetResource @testParams @optionalParameters | Should -BeTrue
-#             } -TestCases @(
-#                 @{
-#                     Parameter = 'Description'
-#                     Value     = $testDescription
-#                 }
-#                 @{
-#                     Parameter = 'LeaseDuration'
-#                     Value     = $testLeaseDuration.ToString()
-#                 }
-#                 @{
-#                     Parameter = 'State'
-#                     Value     = $testState
-#                 }
-#             )
+                Test-TargetResource @testParams | Should -BeFalse
+            }
+        }
+    }
+}
 
-#             It 'Should pass when "Ensure" = "Absent" and scope does not exist' {
-#                 Mock -CommandName Get-DhcpServerv4Scope
+Describe 'DSC_xDhcpServerScope\Set-TargetResource' -Tag 'Set' {
+    Context 'When the resource should be updated' {
+        BeforeAll {
+            Mock -CommandName Assert-Module
+            Mock -CommandName Assert-ScopeParameter
+            Mock -CommandName Update-ResourceProperties
+        }
 
-#                 Test-TargetResource @testParams -Ensure 'Absent' | Should -BeTrue
-#             }
+        It 'Should call the expected mocks' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-#             It 'Should fail when <parameter> parameter is incorrect' {
-#                 param
-#                 (
-#                     [Parameter()]
-#                     $Parameter,
+                $testParams = @{
+                    ScopeId       = '192.168.1.0'
+                    Name          = 'Test Scope'
+                    IPStartRange  = '192.168.1.10'
+                    IPEndRange    = '192.168.1.99'
+                    SubnetMask    = '255.255.255.0'
+                    AddressFamily = 'IPv4'
+                    Debug         = $true
+                }
 
-#                     [Parameter()]
-#                     $Value
-#                 )
+                Set-TargetResource @testParams
+            }
 
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+            Should -Invoke -CommandName Assert-Module -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Assert-ScopeParameter -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Update-ResourceProperties -Exactly -Times 1 -Scope It
+        }
+    }
+}
 
-#                 $testNameParams = $testParams.Clone()
-#                 $testNameParams[$Parameter] = $Value
+Describe 'DSC_xDhcpServerScope\Update-ResourceProperties' -Tag 'Helper' {
+    Context 'When testing DSC resource required properties' {
+        Context 'When the resource is present and correct' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    return @{
+                        ScopeID       = '192.168.1.0'
+                        Name          = 'Test Scope'
+                        StartRange    = '192.168.1.10'
+                        EndRange      = '192.168.1.99'
+                        Description   = 'Scope description'
+                        SubnetMask    = '255.255.255.0'
+                        LeaseDuration = New-TimeSpan -Days 8
+                        State         = 'Active'
+                        AddressFamily = 'IPv4'
+                    }
+                }
+            }
 
-#                 Test-TargetResource @testNameParams | Should -BeFalse
-#             } -TestCases @(
-#                 @{
-#                     Parameter = 'Name'
-#                     Value     = 'IncorrectName'
-#                 }
-#                 @{
-#                     Parameter = 'IPStartRange'
-#                     Value     = '192.168.1.1'
-#                 }
-#                 @{
-#                     Parameter = 'IPEndRange'
-#                     Value     = '192.168.1.254'
-#                 }
-#                 @{
-#                     Parameter = 'SubnetMask'
-#                     Value     = '255.255.255.128'
-#                 }
-#                 @{
-#                     Parameter = 'Description'
-#                     Value     = 'Wrong description'
-#                 }
-#                 @{
-#                     Parameter = 'LeaseDuration'
-#                     Value     = '08:00:00'
-#                 }
-#                 @{
-#                     Parameter = 'State'
-#                     Value     = 'Inactive'
-#                 }
-#                 @{
-#                     Parameter = 'Ensure'
-#                     Value     = 'Absent'
-#                 }
-#             )
-#         }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#         Describe 'DSC_xDhcpServerScope\Set-TargetResource' {
-#             BeforeAll {
-#                 Mock -CommandName Assert-Module
-#             }
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Apply        = $false
+                    }
 
-#             It 'Should call "Add-DhcpServerv4Scope" when "Ensure" = "Present" and scope does not exist' {
-#                 Mock -CommandName Get-DhcpServerv4Scope
-#                 Mock -CommandName Add-DhcpServerv4Scope
+                    Update-ResourceProperties @testParams | Should -BeTrue
+                }
+            }
+        }
 
-#                 Set-TargetResource @testParams
+        Context 'When the resource is absent and correct' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope
+            }
 
-#                 Assert-MockCalled -CommandName Add-DhcpServerv4Scope -ParameterFilter {
-#                     $StartRange -eq $testIPStartRange -and
-#                     $EndRange -eq $testIPEndRange -and
-#                     $SubnetMask -eq $testSubnetMask -and
-#                     $Name -eq $testScopeName
-#                 } -Exactly -Times 1 -Scope It
-#             }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             It 'Should call "Remove-DhcpServerv4Scope" when "Ensure" = "Absent" and scope does exist' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Ensure       = 'Absent'
+                        Apply        = $false
+                    }
 
-#                 Mock -CommandName Remove-DhcpServerv4Scope
+                    Update-ResourceProperties @testParams | Should -BeTrue
+                }
+            }
+        }
 
-#                 Set-TargetResource @testParams -Ensure 'Absent'
+        Context 'When the resource is present and incorrect' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    return @{
+                        ScopeID       = '192.168.1.0'
+                        Name          = 'Test Scope'
+                        StartRange    = '192.168.1.10'
+                        EndRange      = '192.168.1.99'
+                        Description   = 'Scope description'
+                        SubnetMask    = '255.255.255.0'
+                        LeaseDuration = New-TimeSpan -Days 8
+                        State         = 'Active'
+                        AddressFamily = 'IPv4'
+                    }
+                }
+            }
 
-#                 Assert-MockCalled -CommandName Remove-DhcpServerv4Scope -ParameterFilter {
-#                     $ScopeId -eq $testScopeID
-#                 } -Exactly -Times 1 -Scope It
-#             }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             It 'Should call "Set-DhcpServerv4Scope" when "Ensure" = "Present" and scope does exist' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Ensure       = 'Absent'
+                        Apply        = $false
+                    }
 
-#                 Mock -CommandName Set-DhcpServerv4Scope
+                    Update-ResourceProperties @testParams | Should -BeFalse
+                }
+            }
+        }
 
-#                 Set-TargetResource @testParams -LeaseDuration '08:00:00'
+        Context 'When the resource is absent and incorrect' {
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope
+            }
 
-#                 Assert-MockCalled -CommandName Set-DhcpServerv4Scope -ParameterFilter {
-#                     $ScopeId -eq $testScopeID -and
-#                     $LeaseDuration -eq (New-TimeSpan -Hours 8)
-#                 } -Exactly -Times 1 -Scope It
-#             }
+            It 'Should return the correct result' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#             It 'Should call "Remove-DhcpServerv4Scope" when "Ensure" = "Present", scope does exist but "SubnetMask" is incorrect' {
-#                 Mock -CommandName Get-DhcpServerv4Scope -MockWith {
-#                     return $fakeDhcpServerv4Scope
-#                 }
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Ensure       = 'Present'
+                        Apply        = $false
+                    }
 
-#                 Mock -CommandName Remove-DhcpServerv4Scope
-#                 Mock -CommandName Set-DhcpServerv4Scope
+                    Update-ResourceProperties @testParams | Should -BeFalse
+                }
+            }
+        }
 
-#                 $testSubnetMaskParams = $testParams.Clone()
-#                 $testSubnetMaskParams['SubnetMask'] = '255.255.255.128'
+        Context 'When an individual property is incorrect' {
+            BeforeDiscovery {
+                $testCases = @(
+                    @{
+                        Parameter = 'Name'
+                        Value     = 'New Test Scope'
+                    }
+                    @{
+                        Parameter = 'IPStartRange'
+                        Value     = '192.168.1.20'
+                    }
+                    @{
+                        Parameter = 'IPEndRange'
+                        Value     = '192.168.1.199'
+                    }
+                    @{
+                        Parameter = 'SubnetMask'
+                        Value     = '255.255.254.0'
+                    }
+                )
+            }
 
-#                 Set-TargetResource @testSubnetMaskParams
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    return @{
+                        ScopeID       = '192.168.1.0'
+                        Name          = 'Test Scope'
+                        StartRange    = '192.168.1.10'
+                        EndRange      = '192.168.1.99'
+                        Description   = 'Scope description'
+                        SubnetMask    = '255.255.255.0'
+                        LeaseDuration = New-TimeSpan -Days 8
+                        State         = 'Active'
+                        AddressFamily = 'IPv4'
+                    }
+                }
+            }
 
-#                 Assert-MockCalled -CommandName Remove-DhcpServerv4Scope -ParameterFilter {
-#                     $ScopeId -eq $testScopeID
-#                 } -Exactly -Times 1 -Scope It
+            It 'Should return the correct result for property ''<Parameter>''' -ForEach $testCases {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-#                 Assert-MockCalled -CommandName Add-DhcpServerv4Scope -ParameterFilter {
-#                     $StartRange -eq $testIPStartRange -and
-#                     $EndRange -eq $testIPEndRange -and
-#                     $SubnetMask -eq '255.255.255.128' -and
-#                     $Name -eq $testScopeName
-#                 } -Exactly -Times 1 -Scope It
-#             }
-#         }
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Apply        = $false
+                    }
+
+                    $testParams.$Parameter = $Value
+
+                    Update-ResourceProperties @testParams | Should -BeFalse
+                }
+            }
+        }
+    }
+
+    Context 'When testing DSC resource optional properties' {
+        Context 'When the resource is present and correct' {
+            BeforeDiscovery {
+                $testCases = @(
+                    @{
+                        Parameter = 'Description'
+                        Value     = 'Scope description'
+                    }
+                    @{
+                        Parameter = 'LeaseDuration'
+                        Value     = New-TimeSpan -Days 8
+                    }
+                    @{
+                        Parameter = 'State'
+                        Value     = 'Active'
+                    }
+                )
+            }
+
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    return @{
+                        ScopeID       = '192.168.1.0'
+                        Name          = 'Test Scope'
+                        StartRange    = '192.168.1.10'
+                        EndRange      = '192.168.1.99'
+                        Description   = 'Scope description'
+                        SubnetMask    = '255.255.255.0'
+                        LeaseDuration = New-TimeSpan -Days 8
+                        State         = 'Active'
+                        AddressFamily = 'IPv4'
+                    }
+                }
+            }
+
+            It 'Should return the correct result for property ''<Parameter>''' -ForEach $testCases {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Apply        = $false
+                        $Parameter   = $Value
+                    }
+
+                    Update-ResourceProperties @testParams | Should -BeTrue
+                }
+            }
+        }
+
+        Context 'When the resource is present and incorrect' {
+            BeforeDiscovery {
+                $testCases = @(
+                    @{
+                        Parameter = 'Description'
+                        Value     = 'New Scope description'
+                    }
+                    @{
+                        Parameter = 'LeaseDuration'
+                        Value     = New-TimeSpan -Days 10
+                    }
+                    @{
+                        Parameter = 'State'
+                        Value     = 'Inactive'
+                    }
+                )
+            }
+
+            BeforeAll {
+                Mock -CommandName Get-DhcpServerv4Scope -MockWith {
+                    return @{
+                        ScopeID       = '192.168.1.0'
+                        Name          = 'Test Scope'
+                        StartRange    = '192.168.1.10'
+                        EndRange      = '192.168.1.99'
+                        Description   = 'Scope description'
+                        SubnetMask    = '255.255.255.0'
+                        LeaseDuration = New-TimeSpan -Days 8
+                        State         = 'Active'
+                        AddressFamily = 'IPv4'
+                    }
+                }
+            }
+
+            It 'Should return the correct result for property ''<Parameter>''' -ForEach $testCases {
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $testParams = @{
+                        ScopeId      = '192.168.1.0'
+                        Name         = 'Test Scope'
+                        IPStartRange = '192.168.1.10'
+                        IPEndRange   = '192.168.1.99'
+                        SubnetMask   = '255.255.255.0'
+                        Apply        = $false
+                        $Parameter   = $Value
+                    }
+
+                    Update-ResourceProperties @testParams | Should -BeFalse
+                }
+            }
+        }
+    }
+
+    Context 'When setting the DSC resource with required properties' {
+        Context 'When the resource exists' {
+
+        }
+
+        Context 'When the resource does not exist' {
+
+        }
+    }
+}
