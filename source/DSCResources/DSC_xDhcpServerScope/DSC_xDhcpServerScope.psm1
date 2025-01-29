@@ -227,6 +227,7 @@ function Set-TargetResource
         SubnetMask    = $SubnetMask
         AddressFamily = $AddressFamily
     }
+    
     Assert-ScopeParameter @ipAddressesAssertionParameters
 
     #endregion Input Validation
