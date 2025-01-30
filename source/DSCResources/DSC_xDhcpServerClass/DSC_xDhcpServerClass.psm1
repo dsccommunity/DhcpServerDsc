@@ -132,7 +132,7 @@ function Set-TargetResource
             $scopeIDMessage = $script:localizedData.SettingClassIDMessage -f $Name
             Write-Verbose -Message $scopeIDMessage
 
-            set-DhcpServerv4Class -Name $Name -Type $Type -Data $AsciiData -Description $Description
+            Set-DhcpServerv4Class -Name $Name -Type $Type -Data $AsciiData -Description $Description
         }
         else
         {

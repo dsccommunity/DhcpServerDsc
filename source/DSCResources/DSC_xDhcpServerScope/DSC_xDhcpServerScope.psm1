@@ -227,6 +227,7 @@ function Set-TargetResource
         SubnetMask    = $SubnetMask
         AddressFamily = $AddressFamily
     }
+    
     Assert-ScopeParameter @ipAddressesAssertionParameters
 
     #endregion Input Validation
@@ -712,5 +713,3 @@ function Update-ResourceProperties
         }
     } # else !dhcpscope
 }
-
-Export-ModuleMember -Function *-TargetResource

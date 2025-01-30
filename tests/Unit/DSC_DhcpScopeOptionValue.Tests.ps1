@@ -1,16 +1,32 @@
-$script:dscModuleName = 'DhcpServerDsc'
-$script:dscResourceName = 'DSC_DhcpScopeOptionValue'
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
-function Invoke-TestSetup
-{
+BeforeDiscovery {
     try
     {
-        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
+
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
     }
     catch [System.IO.FileNotFoundException]
     {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
     }
+}
+
+BeforeAll {
+    $script:dscModuleName = 'DhcpServerDsc'
+    $script:dscResourceName = 'DSC_DhcpScopeOptionValue'
 
     $script:testEnvironment = Initialize-TestEnvironment `
         -DSCModuleName $script:dscModuleName `
@@ -18,202 +34,129 @@ function Invoke-TestSetup
         -ResourceType 'Mof' `
         -TestType 'Unit'
 
-    # Import the stub functions.
-    Import-Module -Name "$PSScriptRoot/Stubs/DhcpServer_2016_OSBuild_14393_2395.psm1" -Force -DisableNameChecking
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '.\Stubs\DhcpServer_2016_OSBuild_14393_2395.psm1') -DisableNameChecking
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:dscResourceName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:dscResourceName
 }
 
-function Invoke-TestCleanup
-{
+AfterAll {
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:dscResourceName -All | Remove-Module -Force
+
+    Remove-Module -Name 'DhcpServer_2016_OSBuild_14393_2395' -Force
 }
 
-Invoke-TestSetup
-
-try
-{
-    InModuleScope $script:dscResourceName {
-        $optionId = 67
-        $value = @('test Value')
-        $scopeId = '10.1.1.0'
-        $vendorClass = ''
-        $userClass = ''
-        $addressFamily = 'IPv4'
-        $ensure = 'Present'
-
-        $testParams = @{
-            OptionId      = $optionId
-            ScopeId       = $scopeId
-            VendorClass   = $vendorClass
-            UserClass     = $userClass
-            AddressFamily = $addressFamily
-            Verbose       = $true
-        }
-
-        $getFakeDhcpScopev4OptionValue = {
-            return @{
-                OptionId      = $optionId
-                Value         = $value
-                ScopeId       = $scopeId
-                VendorClass   = $vendorClass
-                UserClass     = $userClass
-                AddressFamily = $addressFamily
-            }
-        }
-
-        $getFakeDhcpScopev4OptionValueID168 = {
-            return @{
-                OptionId      = 168
-                Value         = $value
-                ScopeId       = $scopeId
-                VendorClass   = $vendorClass
-                UserClass     = $userClass
-                AddressFamily = $addressFamily
-            }
-        }
-
-        $getFakeDhcpScopev4OptionValueDifferentValue = {
-            return @{
-                OptionId      = $optionId
-                Value         = @('DifferentValue')
-                ScopeId       = $scopeId
-                VendorClass   = $vendorClass
-                UserClass     = $userClass
-                AddressFamily = $addressFamily
-            }
-        }
-
-        Describe 'DSC_DhcpScopeOptionValue\Get-TargetResource' {
-            BeforeAll {
-                Mock -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper'
-            }
-
-            It 'Should call "Assert-Module" to ensure "DHCPServer" module is available' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpScopev4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Get-TargetResource @testParams
-
-                Assert-MockCalled -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper' -Exactly -Times 1 -Scope It
-            }
-
-            It 'Returns a "System.Collections.Hashtable" object type' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpScopev4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Get-TargetResource @testParams
-
-                $result | Should -BeOfType [System.Collections.Hashtable]
-            }
-
-            It 'Returns "Absent" when the option value does not exist' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith { return $null } -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Get-TargetResource @testParams
-
-                $result.Ensure | Should -Be 'Absent'
-            }
-
-            It 'Returns all correct values' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $getFakeDhcpScopev4OptionValueDifferentValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Get-TargetResource @testParams
-
-                $result.Ensure | Should -Be $ensure
-                $result.OptionId | Should -Be $optionId
-                $result.ScopeId | Should -Be $scopeId
-                $result.Value | Should -Be @('DifferentValue')
-                $result.VendorClass | Should -Be $vendorClass
-                $result.UserClass | Should -Be $userClass
-                $result.AddressFamily | Should -Be $addressFamily
-            }
-
-            It 'Returns the properties as $null when the option does not exist' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith { return $null } -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Get-TargetResource @testParams
-
-                $result.Ensure | Should -Be 'Absent'
-                $result.OptionId | Should -Be $null
-                $result.ScopeId | Should -Be $null
-                $result.Value | Should -Be $null
-                $result.VendorClass | Should -Be $null
-                $result.UserClass | Should -Be $null
-                $result.AddressFamily | Should -Be $null
-            }
-        }
-
-
-        Describe 'DSC_DhcpScopeOptionValue\Test-TargetResource' {
-            BeforeAll {
-                Mock -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper'
-            }
-
-            It 'Returns a "System.Boolean" object type' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpScopev4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Test-TargetResource @testParams -Ensure 'Present' -Value $value
-
-                $result | Should -BeOfType [System.Boolean]
-            }
-
-            It 'Returns $true when the option exists and Ensure = Present' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpScopev4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Test-TargetResource @testParams -Ensure 'Present' -Value $value
-
-                $result | Should -Be $true
-            }
-
-            It 'Returns $false when the option does not exist and Ensure = Present' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith { return $null } -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Test-TargetResource @testParams -Ensure 'Present' -Value $value
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns $false when the option exists and Ensure = Absent ' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpScopev4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                $result = Test-TargetResource @testParams -Ensure 'Absent' -Value $value
-
-                $result | Should -Be $false
-            }
-        }
-
-        Describe 'DSC_DhcpScopeOptionValue\Set-TargetResource' {
-            BeforeAll {
-                Mock -CommandName Assert-Module -ModuleName 'DhcpServerDsc.OptionValueHelper'
-            }
-
-            Mock -CommandName Remove-DhcpServerv4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-            Mock -CommandName Set-DhcpServerv4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-            It 'Should call "Set-DhcpServerv4OptionValue" when "Ensure" = "Present" and definition does not exist' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith { return $null } -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                Set-TargetResource @testParams -Ensure 'Present' -Value $value
-
-                Assert-MockCalled -CommandName Set-DhcpServerv4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper' -Exactly -Times 1 -Scope It
-            }
-
-            It 'Should call "Remove-DhcpServerv4OptionValue" when "Ensure" = "Absent" and Definition does exist' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $GetFakeDhcpScopev4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                Set-TargetResource @testParams -Ensure 'Absent' -Value $value
-
-                Assert-MockCalled -CommandName Remove-DhcpServerv4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper' -Exactly -Times 1 -Scope It
-            }
-
-            It 'Should call "Set-DhcpServerv4OptionValue" when "Ensure" = "Present" and option value is different' {
-                Mock -CommandName Get-DhcpServerv4OptionValue -MockWith $getFakeDhcpScopev4OptionValueDifferentValue -ModuleName 'DhcpServerDsc.OptionValueHelper'
-
-                Set-TargetResource @testParams -Ensure 'Present' -Value $value
-
-                Assert-MockCalled -CommandName Set-DhcpServerv4OptionValue -ModuleName 'DhcpServerDsc.OptionValueHelper' -Exactly -Times 1 -Scope It
+Describe 'DSC_DhcpScopeOptionValue\Get-TargetResource' -Tag 'Get' {
+    BeforeAll {
+        Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
+            $ApplyTo -eq 'Scope'
+        } -MockWith {
+            @{
+                ApplyTo       = 'Scope'
+                ReservedIP    = '10.1.1.100'
+                UserClass     = 'AClass'
+                OptionId      = 67
+                Value         = @('test Value')
+                VendorClass   = ''
+                ScopeId       = '10.1.1.0'
+                PolicyName    = 'Test Policy'
+                AddressFamily = 'IPv4'
+                Ensure        = 'Present'
             }
         }
     }
+
+    It 'Should return the correct values' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $testParams = @{
+                ScopeId       = '10.1.1.0'
+                OptionId      = 67
+                VendorClass   = ''
+                UserClass     = ''
+                AddressFamily = 'IPv4'
+            }
+
+            $result = Get-TargetResource @testParams
+
+            $result | Should -BeOfType [System.Collections.Hashtable]
+            $result.Ensure | Should -Be 'Present'
+            $result.OptionId | Should -Be 67
+            $result.Value | Should -Be @('test Value')
+            $result.VendorClass | Should -Be ''
+            $result.UserClass | Should -Be 'AClass'
+            $result.AddressFamily | Should -Be 'IPv4'
+
+            $result.ApplyTo | Should -BeNullOrEmpty
+            $result.PolicyName | Should -BeNullOrEmpty
+            $result.ReservedIP | Should -BeNullOrEmpty
+        }
+
+        Should -Invoke -CommandName Get-TargetResourceHelper -Exactly -Times 1 -Scope It
+    }
 }
-finally
-{
-    Invoke-TestCleanup
+
+Describe 'DSC_DhcpScopeOptionValue\Test-TargetResource' -Tag 'Test' {
+    BeforeAll {
+        Mock -CommandName Test-TargetResourceHelper -MockWith {
+            return $true
+        }
+    }
+
+    It 'Should call the expected mocks' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $testParams = @{
+                ScopeId       = '10.1.1.0'
+                OptionId      = 67
+                Value         = @('test Value')
+                VendorClass   = ''
+                UserClass     = ''
+                AddressFamily = 'IPv4'
+                Ensure        = 'Present'
+            }
+
+            $result = Test-TargetResource @testParams
+
+            $result | Should -BeTrue
+        }
+
+        Should -Invoke -CommandName Test-TargetResourceHelper -Exactly -Times 1 -Scope It
+    }
+}
+
+Describe 'DSC_DhcpScopeOptionValue\Set-TargetResource' -Tag 'Set' {
+    BeforeAll {
+        Mock -CommandName Set-TargetResourceHelper
+    }
+
+    It 'Should call the expected mocks' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $testParams = @{
+                ScopeId       = '10.1.1.0'
+                OptionId      = 67
+                Value         = @('test Value')
+                VendorClass   = ''
+                UserClass     = ''
+                AddressFamily = 'IPv4'
+                Ensure        = 'Present'
+            }
+
+            Set-TargetResource @testParams
+        }
+
+        Should -Invoke -CommandName Set-TargetResourceHelper -Exactly -Times 1 -Scope It
+    }
 }

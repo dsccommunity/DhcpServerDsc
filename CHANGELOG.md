@@ -5,6 +5,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `DhcpServerDsc`
+  - Migrate unit tests to Pester 5
+  - IPv6 preparation work
+  - Increased code coverage to >85% fixes [#60](https://github.com/dsccommunity/DhcpServerDsc/issues/60).
+
+### Added
+
+- Unit tests for `DhcpServerDsc.OptionValueHelper`
+- Unit tests for `DSC_xDhcpServerReservation`
+
 ## [4.0.0] - 2025-01-20
 
 ### Changed
