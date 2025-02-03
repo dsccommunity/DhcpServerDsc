@@ -27,6 +27,7 @@
 
     # Build dependent modules
     'DscResource.Common'           = 'latest'
+    'DscResource.Base'             = 'latest'
 
     # Analyzer rules
     'DscResource.AnalyzerRules'    = 'latest'
