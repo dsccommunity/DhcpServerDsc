@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+Resource `DhcpServerv4DnsDynamicUpdates`. Fixes [#65](https://github.com/dsccommunity/DhcpServerDsc/issues/65)
+
 ## [4.0.0] - 2025-01-20
 
 ### Changed
