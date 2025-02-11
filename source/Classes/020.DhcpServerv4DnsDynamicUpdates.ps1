@@ -1,3 +1,48 @@
+<#
+    .SYNOPSIS
+        The `DhcpServerv4DnsDynamicUpdates` DSC resource is used to create, modify or remove
+        IPv4 DnsDynamicUpdates on a Dhcp Server, ServerPolicy, Scope, ScopePolicy or Reservation.
+
+    .DESCRIPTION
+        This resource is used to create, edit or remove DnsDynamicUpdate settings on DhcpServers.
+
+    .PARAMETER TargetScope
+        The target scope type of the operation.
+
+    .PARAMETER Ensure
+        Specifies whether the configuration should exist.
+
+    .PARAMETER NameProtection
+        Specifies whether Name Protection is enabled.
+
+    .PARAMETER DeleteDnsRROnLeaseExpiry
+        Whether the setting to discard A and PTR records when a lease is deleted.
+
+    .PARAMETER DynamicUpdates
+        The dynamic update mode, this can be Always, Never or OnClientRequest.
+
+    .PARAMETER DisableDnsPtrRRUpdate
+
+
+    .PARAMETER UpdateDnsRRForOlderClients
+
+
+    .PARAMETER IPAddress
+        The IpAddress to target. This is only applicable to Reservation TargetScope.
+
+    .PARAMETER ScopeId
+        The scope Id to target. This is only applicable to Scope and ScopePolicy TargetScope.
+
+    .PARAMETER PolicyName
+        The name of the policy to target. This is only applicable to ServerPolicy and ScopePolicy TargetScope.
+
+    .PARAMETER DnsSuffix
+        The DNS Suffix to register DHCP clients to. This is only applicable to ServerPolicy and ScopePolicy TargetScope.
+
+    .PARAMETER Reasons
+        Returns the reason a property is not in desired state.
+#>
+
 [DscResource()]
 class DhcpServerv4DnsDynamicUpdates : ResourceBase
 {
@@ -78,6 +123,14 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
     {
         $state = @{}
         $getParameters = @{}
+
+        #TODO: Make this stop outputting 'loading module'
+        $SavedVerbosePreference = $global:VerbosePreference
+        $SavedOutputPreference = $global:OutputPreference
+        $global:VerbosePreference = $global:OutputPreference = 'SilentlyContinue'
+        $null = Import-Module 'DhcpServer'
+        $global:VerbosePreference = $SavedVerbosePreference
+        $global:OutputPreference = $SavedOutputPreference
 
         switch ($properties.TargetScope)
         {
@@ -174,7 +227,7 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
                     break
                 }
 
-                Scope
+                ScopePolicy
                 {
                     $state.ScopeId = $this.ScopeId
                     $state.PolicyName = $this.PolicyName
@@ -198,6 +251,37 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
     #>
     hidden [void] Modify([System.Collections.Hashtable] $properties)
     {
+        $setParams = @{}
+
+        switch ($this.TargetScope)
+        {
+            ServerPolicy
+            {
+                $setParams.PolicyName = $this.PolicyName
+                break
+            }
+
+            Scope
+            {
+                $setParams.ScopeId = $this.ScopeId
+                break
+            }
+
+            ScopePolicy
+            {
+                $setParams.ScopeId = $this.ScopeId
+                $setParams.PolicyName = $this.PolicyName
+                break
+            }
+
+            Reservation
+            {
+                $setParams.IPAddress = $this.IPAddress
+                break
+            }
+        }
+
+        Set-DhcpServerv4DnsSetting @setParams @properties
     }
 
     <#
@@ -233,11 +317,12 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
                     'ScopeId'
                     'IPAddress'
                     'PolicyName'
+                    'DnsSuffix'
                 )
 
                 $assertBoundParameterParameters = @{
                     BoundParameterList     = $properties
-                    MutuallyExclusiveList1 = $disallowedParameters
+                    MutuallyExclusiveList1 = 'TargetScope'
                     MutuallyExclusiveList2 = $disallowedParameters
                 }
 
@@ -268,6 +353,18 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
                 }
 
                 Assert-BoundParameter @assertBoundParameterParameters
+
+                $disallowedParameters = @(
+                    'DnsSuffix'
+                )
+
+                $assertBoundParameterParameters = @{
+                    BoundParameterList     = $properties
+                    MutuallyExclusiveList1 = 'TargetScope'
+                    MutuallyExclusiveList2 = $disallowedParameters
+                }
+
+                Assert-BoundParameter @assertBoundParameterParameters
                 break
             }
 
@@ -295,31 +392,29 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
                 }
 
                 Assert-BoundParameter @assertBoundParameterParameters
-                break
-            }
 
-            default
-            {
-                # This should fail as TargetScope is not a valid value
-                throw
+                $disallowedParameters = @(
+                    'DnsSuffix'
+                    'NameProtection'
+                )
+
+                $assertBoundParameterParameters = @{
+                    BoundParameterList     = $properties
+                    MutuallyExclusiveList1 = 'TargetScope'
+                    MutuallyExclusiveList2 = $disallowedParameters
+                }
+
+                Assert-BoundParameter @assertBoundParameterParameters
+                break
             }
         }
 
-        $ipStringsToValidate = @(
-            @{
-                ParameterName = 'IPAddress'
-            }
-            @{
-                ParameterName = 'ScopeId'
-            }
-        )
-
-        foreach ($ipString in $ipStringsToValidate)
+        foreach ($ipString in @('IPAddress', 'ScopeId'))
         {
-            if ($properties.ContainsKey($ipString.ParameterName))
+            if ($properties.ContainsKey($ipString))
             {
                 $getValidIpAddressParams = @{
-                    Address       = $properties.($ipString.ParameterName)
+                    Address       = $properties.$ipString
                     AddressFamily = 'IPv4'
                 }
 
