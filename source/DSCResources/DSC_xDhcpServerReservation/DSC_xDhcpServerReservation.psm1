@@ -402,5 +402,3 @@ function Update-ResourceProperties
 }
 
 #endregion
-
-Export-ModuleMember -Function *-TargetResource

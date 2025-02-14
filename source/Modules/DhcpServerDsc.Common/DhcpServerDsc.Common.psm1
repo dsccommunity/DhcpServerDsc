@@ -40,7 +40,7 @@ function Get-ValidIPAddress
         $IpString,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily,
 
@@ -48,8 +48,6 @@ function Get-ValidIPAddress
         [System.String]
         $ParameterName
     )
-
-    $ipAddressFamily = ''
 
     if ($AddressFamily -eq 'IPv4')
     {
@@ -145,21 +143,22 @@ function Assert-ScopeParameter
         $IPEndRange,
 
         [Parameter(Mandatory = $true)]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily
     )
 
     # Convert the Subnet Mask to be a valid IPAddress
-    $netMask = Get-ValidIpAddress -IpString $SubnetMask -AddressFamily $AddressFamily -ParameterName SubnetMask
+    $netMask = Get-ValidIPAddress -IpString $SubnetMask -AddressFamily $AddressFamily -ParameterName SubnetMask
 
     # Convert the ScopeID to be a valid IPAddress
     $scope = Get-ValidIPAddress -IpString $ScopeId -AddressFamily $AddressFamily -ParameterName ScopeId
 
     # Convert the Start Range to be a valid IPAddress
-    $startRange = Get-ValidIpAddress -IpString $IPStartRange -AddressFamily $AddressFamily -ParameterName IPStartRange
+    $startRange = Get-ValidIPAddress -IpString $IPStartRange -AddressFamily $AddressFamily -ParameterName IPStartRange
 
     # Convert the End Range to be a valid IPAddress
-    $endRange = Get-ValidIpAddress -IpString $IPEndRange -AddressFamily $AddressFamily -ParameterName IPEndRange
+    $endRange = Get-ValidIPAddress -IpString $IPEndRange -AddressFamily $AddressFamily -ParameterName IPEndRange
 
     # Check to ensure startRange is smaller than endRange
     if ($endRange.Address -lt $startRange.Address)
@@ -220,7 +219,7 @@ function Write-PropertyMessage
     }
 }
 
-# Internal function to translate a string to valid IPAddress format
+# Internal function to translate a string to valid TimeSpan format
 function Get-ValidTimeSpan
 {
     [CmdletBinding()]
