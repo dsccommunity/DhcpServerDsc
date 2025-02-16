@@ -74,7 +74,7 @@ function Get-TargetResourceHelper
         $ReservedIP,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily
     )
@@ -100,6 +100,7 @@ function Get-TargetResourceHelper
                 VendorClass = $VendorClass
                 userClass   = $UserClass
             }
+
             $currentConfiguration = Get-DhcpServerv4OptionValue @parameters -ErrorAction 'SilentlyContinue'
         }
 
@@ -115,6 +116,7 @@ function Get-TargetResourceHelper
                 VendorClass = $VendorClass
                 UserClass   = $UserClass
             }
+
             $currentConfiguration = Get-DhcpServerv4OptionValue @parameters -ErrorAction 'SilentlyContinue'
         }
 
@@ -133,6 +135,7 @@ function Get-TargetResourceHelper
                     VendorClass = $VendorClass
                     ScopeId     = $ScopeId
                 }
+
                 $currentConfiguration = Get-DhcpServerv4OptionValue @parameters -ErrorAction 'SilentlyContinue'
             }
             else
@@ -142,6 +145,7 @@ function Get-TargetResourceHelper
                     OptionId    = $OptionId
                     VendorClass = $VendorClass
                 }
+
                 $currentConfiguration = Get-DhcpServerv4OptionValue @parameters -ErrorAction 'SilentlyContinue'
             }
         }
@@ -158,6 +162,7 @@ function Get-TargetResourceHelper
                 VendorClass = $VendorClass
                 UserClass   = $UserClass
             }
+
             $currentConfiguration = Get-DhcpServerv4OptionValue @parameters -ErrorAction 'SilentlyContinue'
         }
     }
@@ -277,7 +282,7 @@ function Test-TargetResourceHelper
         $ReservedIP,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily,
 
@@ -299,7 +304,9 @@ function Test-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Server' @parameters
+
             # Testing for Ensure = Present
             if ($Ensure -eq 'Present')
             {
@@ -349,7 +356,9 @@ function Test-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Scope' @parameters
+
             # Testing for Ensure = Present
             if ($Ensure -eq 'Present')
             {
@@ -400,7 +409,9 @@ function Test-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Policy' @parameters
+
             # Testing for Ensure = Present
             if ($Ensure -eq 'Present')
             {
@@ -450,7 +461,9 @@ function Test-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'ReservedIP' @parameters
+
             # Testing for Ensure = Present
             if ($Ensure -eq 'Present')
             {
@@ -576,7 +589,7 @@ function Set-TargetResourceHelper
         $ReservedIP,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('IPv4')]
+        [ValidateSet('IPv4', 'IPv6')]
         [System.String]
         $AddressFamily,
 
@@ -597,6 +610,7 @@ function Set-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Server' @parameters
 
             # Testing for Ensure = Present
@@ -629,6 +643,7 @@ function Set-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Scope' @parameters
 
             # Testing for Ensure = Present
@@ -639,7 +654,6 @@ function Set-TargetResourceHelper
                 Write-Verbose $scopeSettingValueMessage
                 Set-DhcpServerv4OptionValue -ScopeId $ScopeId -OptionId $OptionId -Value $Value -VendorClass $VendorClass -UserClass $UserClass -Force
             }
-
             # Ensure = 'Absent'
             else
             {
@@ -666,6 +680,7 @@ function Set-TargetResourceHelper
                     UserClass     = $UserClass
                     AddressFamily = $AddressFamily
                 }
+
                 $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Policy' @parameters
 
                 # Testing for Ensure = Present
@@ -699,7 +714,9 @@ function Set-TargetResourceHelper
                     UserClass     = $UserClass
                     AddressFamily = $AddressFamily
                 }
+
                 $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'Policy' @parameters
+
                 # Testing for Ensure = Present
                 if ($Ensure -eq 'Present')
                 {
@@ -730,6 +747,7 @@ function Set-TargetResourceHelper
                 UserClass     = $UserClass
                 AddressFamily = $AddressFamily
             }
+
             $currentConfiguration = Get-TargetResourceHelper -ApplyTo 'ReservedIP' @parameters
 
             # Testing for Ensure = Present
