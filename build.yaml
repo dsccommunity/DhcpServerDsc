@@ -94,12 +94,6 @@ Pester:
   ExcludeFromCodeCoverage:
     - Modules/DscResource.Common
     - Modules/DscResource.Base
-  Script:
-    - tests/Unit
-  Tag:
-  CodeCoverageThreshold: 65
-  CodeCoverageOutputFile: CodeCoverage.xml
-  CodeCoverageOutputFileEncoding: ascii
 
 CodeCoverage:
   CodeCoverageMergedOutputFile: CodeCov_Merged.xml
@@ -125,8 +119,9 @@ DscTest:
     ExcludeModuleFile:
       - Modules/DscResource.Common
       - Modules/DscResource.Base
+      # Must exclude built module file because it should not be tested like MOF-based resources
       - DhcpServerDsc.psm1
-  MainGitBranch: main
+    MainGitBranch: main
 
 ModuleBuildTasks:
   Sampler:
