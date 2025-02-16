@@ -11,7 +11,6 @@ ConvertFrom-StringData @'
     # None
 
     ## Strings directly used by the derived class DhcpServerv4DnsDynamicUpdates.
-    SpecificParametersOneMustBeSet = At least one of the parameters '{0}' must be specified. (DS4DDU0001)
     ServerPolicyDoesNotExist = The Server Policy '{0}' does not exist. (DS4DDU0001)
     ScopeDoesNotExist = The Scope '{0}' does not exist. (DS4DDU0002)
     ScopePolicyDoesNotExist = The Scope Policy '{0}', '{1}' does not exist. (DS4DDU0003)
