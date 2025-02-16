@@ -93,6 +93,7 @@ Pester:
       OutputEncoding: ascii
   ExcludeFromCodeCoverage:
     - Modules/DscResource.Common
+    - Modules/DscResource.Base
   Script:
     - tests/Unit
   Tag:
