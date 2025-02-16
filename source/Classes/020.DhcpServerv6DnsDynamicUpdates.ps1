@@ -124,7 +124,7 @@ class DhcpServerv6DnsDynamicUpdates : ResourceBase
 
         if (-not $optionalProperties)
         {
-            $errorMessage = $script:localizedData.SpecificParametersOneMustBeSet -f ($mustHaveOne -join ''', ''')
+            $errorMessage = $this.localizedData.SpecificParametersOneMustBeSet -f ($mustHaveOne -join ''', ''')
 
             $PSCmdlet.ThrowTerminatingError(
                 [System.Management.Automation.ErrorRecord]::new(
