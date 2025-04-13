@@ -1,4 +1,17 @@
-# Internal function to throw terminating error with specified ErrorCategory, ErrorId and ErrorMessage
+<#
+    .SYNOPSIS
+        Creates a terminating error record and throws it.
+
+    .PARAMETER ErrorId
+        The error ID.
+
+    .PARAMETER ErrorMessage
+        The error message.
+
+    .PARAMETER ErrorCategory
+        The error category.
+#>
+
 function New-TerminatingError
 {
     [CmdletBinding()]

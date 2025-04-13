@@ -1,7 +1,21 @@
-# Internal function to translate a string to valid TimeSpan format
+<#
+    .SYNOPSIS
+        Validates a string to ensure it is a valid TimeSpan.
+
+    .PARAMETER TsString
+        The string to validate.
+
+    .PARAMETER ParameterName
+        The name of the parameter for error purposes.
+
+    .OUTPUTS
+        [System.TimeSpan] object.
+#>
+
 function Get-ValidTimeSpan
 {
     [CmdletBinding()]
+    [OutputType([System.TimeSpan])]
     param
     (
         [Parameter(Mandatory = $true)]

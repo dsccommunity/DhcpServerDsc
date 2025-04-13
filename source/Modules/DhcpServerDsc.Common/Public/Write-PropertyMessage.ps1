@@ -1,4 +1,17 @@
-# Internal function to write verbose messages for collection of properties
+<#
+    .SYNOPSIS
+        Writes the property message to the verbose stream.
+
+    .PARAMETER Parameters
+        The parameters to write.
+
+    .PARAMETER KeysToSkip
+        The keys to skip.
+
+    .PARAMETER MessageTemplate
+        The message template to use.
+#>
+
 function Write-PropertyMessage
 {
     param

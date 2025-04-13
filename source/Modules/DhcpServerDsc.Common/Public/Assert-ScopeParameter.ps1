@@ -1,7 +1,6 @@
-
 <#
     .SYNOPSIS
-        Internal function to assert if values of ScopeId/SubnetMask/IPStartRange/IPEndRange make sense.
+        Function to assert if values of ScopeId/SubnetMask/IPStartRange/IPEndRange make sense.
 
     .DESCRIPTION
         Internal function used to assert if value of following parameters are correct:
@@ -18,29 +17,30 @@
         Implementation for IPv4.
 
     .PARAMETER ScopeId
-    String version of ScopeId.
+        String version of ScopeId.
 
     .PARAMETER SubnetMask
-    String version of SubnetMask.
+        String version of SubnetMask.
 
     .PARAMETER IPStartRange
-    String version of StartRange.
+        String version of StartRange.
 
     .PARAMETER IPEndRange
-    String version of EndRange.
+        String version of EndRange.
 
     .PARAMETER AddressFamily
-    AddressFamily that IPs should validate against.
+        AddressFamily that IPs should validate against.
 
     .EXAMPLE
-    Assert-ScopeParameter -ScopeId 192.168.1.0 -SubnetMask 255.255.255.0 -IPStartRange 192.168.1.1 -IPEndRange 192.168.1.254 -AddressFamily IPv4
-    Validates all parameters against rules and returns nothing (all parameters are correct).
+        Assert-ScopeParameter -ScopeId 192.168.1.0 -SubnetMask 255.255.255.0 -IPStartRange 192.168.1.1 -IPEndRange 192.168.1.254 -AddressFamily IPv4
+        Validates all parameters against rules and returns nothing (all parameters are correct).
 
     .EXAMPLE
-    Assert-ScopeParameter -ScopeId 192.168.1.0 -SubnetMask 255.255.240.0 -IPStartRange 192.168.1.1 -IPEndRange 192.168.1.254 -AddressFamily IPv4
-    Returns error informing that using specified SubnetMask with specified ScopeId is incorrect:
-    Value of byte 3 in ScopeId (1) is not valid. Binary AND with byte 3 in SubnetMask (240) should be equal to byte 3 in ScopeId (1).
+        Assert-ScopeParameter -ScopeId 192.168.1.0 -SubnetMask 255.255.240.0 -IPStartRange 192.168.1.1 -IPEndRange 192.168.1.254 -AddressFamily IPv4
+        Returns error informing that using specified SubnetMask with specified ScopeId is incorrect:
+        Value of byte 3 in ScopeId (1) is not valid. Binary AND with byte 3 in SubnetMask (240) should be equal to byte 3 in ScopeId (1).
 #>
+
 function Assert-ScopeParameter
 {
     [CmdletBinding()]

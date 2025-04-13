@@ -1,4 +1,23 @@
-# Internal function to translate a string to valid IPAddress format
+<#
+    .SYNOPSIS
+        Function to convert an IP address from a string to a [System.Net.IPAddress] type.
+
+    .DESCRIPTION
+        Function to try and convert a IPv4 or IPv6 string to a [System.Net.IPAddress] type.
+
+    .PARAMETER IpString
+        IpString to convert.
+
+    .PARAMETER AddressFamily
+        The AddressFamily of the IpString.
+
+    .PARAMETER ParameterName
+        The ParameterName of the IpString for error purposes.
+
+    .OUTPUTS
+        [System.Net.IPAddress] object.
+#>
+
 function Get-ValidIPAddress
 {
     [CmdletBinding()]
