@@ -38,37 +38,14 @@
 
     .PARAMETER DnsSuffix
         The DNS Suffix to register DHCP clients to. This is only applicable to ServerPolicy and ScopePolicy TargetScope.
-
-    .PARAMETER Reasons
-        Returns the reason a property is not in desired state.
 #>
 
 [DscResource()]
-class DhcpServerv4DnsDynamicUpdates : ResourceBase
+class DhcpServerv4DnsDynamicUpdates : DhcpServerDnsDynamicUpdatesBase
 {
     [DscProperty(Key)]
     [Dhcpv4TargetScopeType]
     $TargetScope
-
-    [DscProperty(Mandatory)]
-    [Ensure]
-    $Ensure = [Ensure]::Present
-
-    [DscProperty()]
-    [System.Nullable[System.Boolean]]
-    $NameProtection
-
-    [DscProperty()]
-    [System.Nullable[System.Boolean]]
-    $DeleteDnsRROnLeaseExpiry
-
-    [DscProperty()]
-    [DynamicUpdatesType]
-    $DynamicUpdates
-
-    [DscProperty()]
-    [System.String]
-    $IPAddress
 
     [DscProperty()]
     [System.Nullable[System.Boolean]]
@@ -90,13 +67,8 @@ class DhcpServerv4DnsDynamicUpdates : ResourceBase
     [System.String]
     $DnsSuffix
 
-    [DscProperty(NotConfigurable)]
-    [DhcpServerReason[]]
-    $Reasons
-
-    DhcpServerv4DnsDynamicUpdates () : base ($PSScriptRoot)
+    DhcpServerv4DnsDynamicUpdates () : base ()
     {
-        $this.FeatureOptionalEnums = $true
     }
 
     # Required DSC Methods, these call the method in the base class.

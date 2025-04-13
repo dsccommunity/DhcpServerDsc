@@ -31,45 +31,19 @@
 #>
 
 [DscResource()]
-class DhcpServerv6DnsDynamicUpdates : ResourceBase
+class DhcpServerv6DnsDynamicUpdates : DhcpServerDnsDynamicUpdatesBase
 {
     [DscProperty(Key)]
     [Dhcpv6TargetScopeType]
     $TargetScope
 
-    [DscProperty(Mandatory)]
-    [Ensure]
-    $Ensure = [Ensure]::Present
-
-    [DscProperty()]
-    [System.Nullable[System.Boolean]]
-    $NameProtection
-
-    [DscProperty()]
-    [System.Nullable[System.Boolean]]
-    $DeleteDnsRROnLeaseExpiry
-
-    [DscProperty()]
-    [DynamicUpdatesType]
-    $DynamicUpdates
-
-    [DscProperty()]
-    [System.String]
-    $IPAddress
-
     [DscProperty()]
     [System.String]
     $Prefix
 
-    [DscProperty(NotConfigurable)]
-    [DhcpServerReason[]]
-    $Reasons
-
-    DhcpServerv6DnsDynamicUpdates () : base ($PSScriptRoot)
+    DhcpServerv6DnsDynamicUpdates () : base ()
     {
         $this.ExcludeDscProperties = @()
-
-        $this.FeatureOptionalEnums = $true
     }
 
     # Required DSC Methods, these call the method in the base class.
