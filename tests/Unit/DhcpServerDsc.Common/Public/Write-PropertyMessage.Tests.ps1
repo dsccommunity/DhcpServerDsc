@@ -69,7 +69,7 @@ Describe 'DhcpServerDsc.Common\Write-PropertyMessage' {
                         PropertyName  = 'TestProperty'
                         PropertyValue = 'TestValue'
                     }
-                    KeysToSkip      = @()
+                    KeysToSkip      = @('Somekey')
                     MessageTemplate = 'Mock message template {0}'
                 }
 
