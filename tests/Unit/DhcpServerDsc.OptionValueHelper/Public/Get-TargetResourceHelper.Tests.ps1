@@ -4,7 +4,7 @@
 #>
 
 # Suppressing this rule because Script Analyzer does not understand Pester's syntax.
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Suppressing this rule because Script Analyzer does not understand Pester syntax.')]
 param ()
 
 BeforeDiscovery {
@@ -136,7 +136,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
         Mock -CommandName Assert-Module
     }
 
-    Context 'When the the DhcpOption Exists' {
+    Context 'When the DhcpOption Exists' {
         Context 'When ApplyTo is ''<testParams.ApplyTo>''' -ForEach $testCases {
             BeforeAll {
                 Mock -CommandName Get-DhcpServerv4OptionValue -MockWith {
@@ -159,7 +159,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Get-TargetResourceHelper' {
         }
     }
 
-    Context 'When the the DhcpOption does not exist' {
+    Context 'When the DhcpOption does not exist' {
         Context 'When ApplyTo is ''<testParams.ApplyTo>''' -ForEach $testCases {
             BeforeAll {
                 Mock -CommandName Get-DhcpServerv4OptionValue

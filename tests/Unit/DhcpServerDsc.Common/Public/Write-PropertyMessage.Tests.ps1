@@ -4,7 +4,7 @@
 #>
 
 # Suppressing this rule because Script Analyzer does not understand Pester's syntax.
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Suppressing this rule because Script Analyzer does not understand Pester syntax.')]
 param ()
 
 BeforeDiscovery {
@@ -69,7 +69,7 @@ Describe 'DhcpServerDsc.Common\Write-PropertyMessage' {
                         PropertyName  = 'TestProperty'
                         PropertyValue = 'TestValue'
                     }
-                    KeysToSkip      = @('Somekey')
+                    KeysToSkip      = @()
                     MessageTemplate = 'Mock message template {0}'
                 }
 

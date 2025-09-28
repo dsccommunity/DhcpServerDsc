@@ -36,6 +36,7 @@
 function Test-TargetResourceHelper
 {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]

@@ -4,7 +4,7 @@
 #>
 
 # Suppressing this rule because Script Analyzer does not understand Pester's syntax.
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Suppressing this rule because Script Analyzer does not understand Pester syntax.')]
 param ()
 
 BeforeDiscovery {
@@ -111,7 +111,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
                     OptionId      = 1
                     VendorClass   = ''
                     UserClass     = ''
-                    ScopeId       = '192.168.0.1'
+                    ReservedIP       = '192.168.0.10'
                     AddressFamily = 'IPv4'
                     Value         = '10'
                 }
@@ -202,7 +202,7 @@ Describe 'DhcpServerDsc.OptionValueHelper\Test-TargetResourceHelper' {
         }
     }
 
-    Context 'When the DhcpOption should not exist and does for <testParams.ApplyTo>' -ForEach $testCases {
+    Context 'When the DhcpOption should not exist and does not for <testParams.ApplyTo>' -ForEach $testCases {
         BeforeAll {
             Mock -CommandName Get-TargetResourceHelper -ParameterFilter {
                 $ApplyTo -eq $testParams.ApplyTo
