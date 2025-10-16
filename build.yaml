@@ -27,6 +27,22 @@ NestedModule:
     Path: ./output/RequiredModules/DscResource.Base
     AddToManifest: false
     Exclude: PSGetModuleInfo.xml
+  DhcpServerDsc.Common:
+    Prefix: prefix.ps1
+    VersionedOutputDirectory: false
+    CopyPaths:
+      - en-US
+    Encoding: UTF8
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
+  DhcpServerDsc.OptionValueHelper:
+    Prefix: prefix.ps1
+    VersionedOutputDirectory: false
+    CopyPaths:
+      - en-US
+    Encoding: UTF8
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #            Pipeline Configuration                #
