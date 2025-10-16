@@ -36,7 +36,9 @@
         "keepachangelog",
         "notin",
         "pscmdlet",
-        "steppable"
+        "steppable",
+        "Serverv",
+        "Dhcpv"
     ],
     "cSpell.ignorePaths": [
         ".git"

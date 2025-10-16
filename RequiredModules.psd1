@@ -27,12 +27,18 @@
 
     # Build dependent modules
     'DscResource.Common'           = 'latest'
+    'DscResource.Base'             = 'latest'
 
     # Analyzer rules
     'DscResource.AnalyzerRules'    = 'latest'
     'Indented.ScriptAnalyzerRules' = 'latest'
 
     # Prerequisite modules for documentation.
-    'DscResource.DocGenerator'     = 'latest'
+    'DscResource.DocGenerator'     = @{
+        Version    = 'latest'
+        Parameters = @{
+            AllowPrerelease = $true
+        }
+    }
     PlatyPS                        = 'latest'
 }
