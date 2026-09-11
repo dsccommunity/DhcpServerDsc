@@ -1,6 +1,6 @@
 <#
     .SYNOPSiS
-       This example reservs an IP address within a DHCP server.
+       This example reserves an IP address within a DHCP server.
 #>
 configuration Example
 {
